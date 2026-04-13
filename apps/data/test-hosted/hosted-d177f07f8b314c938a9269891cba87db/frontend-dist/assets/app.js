@@ -1,0 +1,1 @@
+console.log('doc2dash hosted app');

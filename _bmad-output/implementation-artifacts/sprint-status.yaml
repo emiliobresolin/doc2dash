@@ -1,0 +1,42 @@
+# Sprint Status
+# generated: 2026-04-04
+# project: doc2dash
+# tracking_system: file-system
+
+generated: 2026-04-04
+last_updated: 2026-04-12
+project: doc2dash
+project_key: DOC2DASH
+tracking_system: file-system
+story_location: "_bmad-output/implementation-artifacts"
+
+development_status:
+  epic-4: done
+  4-1-deliver-browser-upload-landing-and-dashboard-handoff: done
+  4-2-add-upload-processing-ux-and-route-level-terminal-states: done
+  4-3-productionize-same-origin-frontend-and-backend-integration: done
+  4-4-define-hosted-mvp-deployment-and-runtime-configuration: done
+  epic-4-retrospective: optional
+
+  epic-1: in-progress
+  1-1-upload-validate-and-build-workbook-manifest: review
+  1-2-detect-sheet-and-table-boundaries: review
+  1-3-normalize-wide-tables-and-profile-columns: review
+  epic-1-retrospective: optional
+
+  epic-2: in-progress
+  2-1-deliver-dashboard-shell-and-workbook-navigation: review
+  2-2-generate-safe-default-charts: review
+  2-3-search-and-preview-across-extracted-data: done
+  epic-2-retrospective: optional
+
+  epic-3: in-progress
+  3-1-create-fixture-pack-and-automated-detection-tests: done
+  3-2-add-accessibility-and-low-confidence-review-ux: done
+  3-3-harden-performance-cancellation-and-failure-recovery: done
+  3-4-rebaseline-current-fixture-library-and-presentation-regression-expectations: review
+  3-5-harden-search-result-presentation-and-stable-dashboard-card-sizing: review
+  3-6-keep-dashboard-navigation-reachable-during-reading: review
+  3-7-improve-default-view-quality-and-condense-report-style-workbooks: review
+  3-8-add-in-preview-filtering-for-source-aware-table-inspection: review
+  epic-3-retrospective: optional

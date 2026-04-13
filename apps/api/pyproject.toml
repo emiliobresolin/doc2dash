@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=69.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "doc2dash-api"
+version = "0.1.0"
+description = "FastAPI backend for doc2dash"
+requires-python = ">=3.11"
+dependencies = [
+  "fastapi>=0.115.0",
+  "httpx>=0.28.0",
+  "openpyxl>=3.1.0",
+  "pandas>=2.2.0",
+  "pydantic-settings>=2.6.0",
+  "python-multipart>=0.0.12",
+  "pytest>=8.3.0",
+  "uvicorn>=0.32.0",
+]
+
+[tool.pytest.ini_options]
+addopts = "-p no:cacheprovider"
+testpaths = ["tests"]

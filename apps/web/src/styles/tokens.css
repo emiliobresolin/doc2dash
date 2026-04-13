@@ -1,0 +1,17 @@
+:root {
+  color-scheme: light;
+  --bg: #f4efe7;
+  --panel: rgba(255, 252, 247, 0.92);
+  --panel-strong: #fffaf2;
+  --line: rgba(56, 45, 34, 0.12);
+  --text: #241a11;
+  --muted: #6d5a46;
+  --accent: #0b7a75;
+  --accent-soft: rgba(11, 122, 117, 0.12);
+  --shadow: 0 20px 40px rgba(36, 26, 17, 0.08);
+  --radius-lg: 28px;
+  --radius-md: 18px;
+  --radius-sm: 12px;
+  --font-display: "Georgia", "Iowan Old Style", serif;
+  --font-body: "Aptos", "Segoe UI Variable Text", "Trebuchet MS", sans-serif;
+}

@@ -1,0 +1,20 @@
+services:
+  app:
+    build:
+      context: .
+    image: doc2dash-local-public:latest
+    ports:
+      - "${DOC2DASH_LOCAL_PORT:-8011}:10000"
+    volumes:
+      - doc2dash_uploads:/var/data/doc2dash-uploads
+    restart: unless-stopped
+
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    command: tunnel --no-autoupdate --url http://app:10000
+    depends_on:
+      - app
+    restart: unless-stopped
+
+volumes:
+  doc2dash_uploads:
