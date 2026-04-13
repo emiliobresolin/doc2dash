@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 
@@ -559,6 +559,50 @@ test("lands on the backend-selected default dashboard view", async () => {
   expect(screen.getByText("Provenance: Generated")).toBeInTheDocument();
 });
 
+test("keeps reading navigation in the top masthead and bounds dense preview content inside the preview card", async () => {
+  const longNote = "Long dense preview note ".repeat(20).trim();
+
+  renderDashboard({
+    previewData: {
+      ...previews,
+      tbl_02_01: {
+        ...previews.tbl_02_01,
+        columns: ["Team", "Value", "Notes"],
+        rowCount: 1,
+        totalPages: 1,
+        rows: [
+          {
+            Team: "Platform",
+            Value: 4,
+            Notes: longNote,
+          },
+        ],
+      },
+    },
+  });
+
+  const readingNavigation = await screen.findByRole("region", {
+    name: "Reading navigation",
+  });
+  const previewRegion = screen.getByRole("region", { name: "Source-aware rows" });
+
+  expect(readingNavigation.closest(".app-masthead")).not.toBeNull();
+  expect(readingNavigation.closest(".app-workspace")).toBeNull();
+  expect(previewRegion).toHaveClass("workspace-card--preview");
+  expect(previewRegion).toHaveClass("workspace-card--preview-wide");
+  expect(await within(previewRegion).findByTitle(longNote)).toBeInTheDocument();
+});
+
+test("keeps the preview table in the lower full-width workspace band for wider source inspection", async () => {
+  renderDashboard();
+
+  const previewRegion = await screen.findByRole("region", { name: "Source-aware rows" });
+  const workspace = previewRegion.closest(".app-workspace");
+
+  expect(workspace).not.toBeNull();
+  expect(previewRegion).toHaveClass("workspace-card--preview-wide");
+});
+
 test("keeps the upload handoff route in a clear processing state until the dashboard is ready", async () => {
   let manifestCalls = 0;
 
@@ -815,6 +859,95 @@ test("shows only valid chart options and switches the chart without changing the
     ),
   ).toBeInTheDocument();
   expect(screen.getByRole("cell", { name: "Platform" })).toBeInTheDocument();
+});
+
+test("derives stronger scoped chart pairings from the selected result and lets the user switch between them", async () => {
+  const user = userEvent.setup();
+  const scopedSearchData: PreviewSearchResponse = {
+    query: "gastos",
+    resultCount: 1,
+    limit: 6,
+    truncated: false,
+    tookMs: 17,
+    results: [
+      {
+        tableId: "tbl_02_01",
+        sheetId: "sheet_02",
+        sheetName: "Costs",
+        matchCount: 4,
+        matchedColumns: ["GASTOS DIARIOS", "Custo"],
+        snippet: "GASTOS DIARIOS: Hotel / Custo: R$ 340,40",
+        previewRows: [
+          {
+            rowIndex: 0,
+            matchedColumns: ["GASTOS DIARIOS", "Custo"],
+            row: {
+              "GASTOS DIARIOS": "Hotel",
+              Custo: "R$ 340,40",
+              Modelo: "Viagem",
+              Detalhe: "Hospedagem com cafe incluso",
+            },
+          },
+          {
+            rowIndex: 1,
+            matchedColumns: ["GASTOS DIARIOS", "Custo"],
+            row: {
+              "GASTOS DIARIOS": "Taxi",
+              Custo: "R$ 58,90",
+              Modelo: "Transporte",
+              Detalhe: "Deslocamento aeroporto",
+            },
+          },
+          {
+            rowIndex: 2,
+            matchedColumns: ["GASTOS DIARIOS", "Custo"],
+            row: {
+              "GASTOS DIARIOS": "Taxi",
+              Custo: "R$ 42,15",
+              Modelo: "Transporte",
+              Detalhe: "Reuniao cliente centro",
+            },
+          },
+          {
+            rowIndex: 3,
+            matchedColumns: ["GASTOS DIARIOS", "Custo"],
+            row: {
+              "GASTOS DIARIOS": "Alimentacao",
+              Custo: "R$ 75,00",
+              Modelo: "Reembolso",
+              Detalhe: "Jantar com equipe do projeto",
+            },
+          },
+        ],
+      },
+    ],
+  };
+
+  renderDashboard({ searchData: scopedSearchData });
+
+  await screen.findByRole("cell", { name: "Platform" });
+  await user.type(screen.getByRole("searchbox", { name: "Search preview rows" }), "gastos");
+  await user.click(await screen.findByRole("button", { name: "Present Costs / tbl_02_01" }));
+
+  const chartFocus = await screen.findByRole("combobox", { name: "Chart focus" });
+  const optionLabels = within(chartFocus)
+    .getAllByRole("option")
+    .map((option) => option.textContent);
+
+  expect(optionLabels).toContain("Custo by GASTOS DIARIOS");
+  expect(optionLabels).toContain("Custo by Modelo");
+  expect(screen.getByText("Scoped charts")).toBeInTheDocument();
+  expect(screen.getByText("Focus: Custo by GASTOS DIARIOS")).toBeInTheDocument();
+  expect(
+    screen.getByText("Custo by GASTOS DIARIOS", { selector: "figcaption" }),
+  ).toBeInTheDocument();
+  expect(screen.getByRole("cell", { name: "Hotel" })).toBeInTheDocument();
+  expect(screen.queryByRole("cell", { name: "Platform" })).not.toBeInTheDocument();
+
+  await user.selectOptions(chartFocus, "pair-custo-modelo");
+
+  expect(screen.getByText("Focus: Custo by Modelo")).toBeInTheDocument();
+  expect(screen.getByText("Custo by Modelo", { selector: "figcaption" })).toBeInTheDocument();
 });
 
 test("paginates preview rows without leaving presenter mode or reloading the manifest", async () => {

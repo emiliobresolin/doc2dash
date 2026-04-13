@@ -1,0 +1,32 @@
+{
+  "url": "http://127.0.0.1:4175/uploads/upl_X2Wa2I3osa_K",
+  "previewClass": "workspace-card workspace-card--preview workspace-card--preview-wide",
+  "chartClass": null,
+  "scopedClass": null,
+  "previewRect": {
+    "x": 336,
+    "y": 278,
+    "width": 1206.984375,
+    "height": 812.0625
+  },
+  "chartRect": null,
+  "focusValue": null,
+  "focusOptions": [],
+  "badges": [
+    "Trusted",
+    "Confidence: 96%",
+    "Transformation: None",
+    "Chart provenance: Generated",
+    "Mode: chart",
+    "Confidence: 96%",
+    "Orientation: long_form",
+    "Source: LegacyFederation",
+    "Provenance: generated",
+    "Default: bar",
+    "Provenance: Generated",
+    "Selected: Bar",
+    "Table: tbl_10_01",
+    "Rows: 10",
+    "Page 1 of 1"
+  ]
+}

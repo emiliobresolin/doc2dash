@@ -6,3 +6,15 @@
   [32m[1mVITE[22m v5.4.21[39m  [2mready in [0m[1m276[22m[2m[0m ms[22m
 
   [32m➜[39m  [1mLocal[22m:   [36mhttp://127.0.0.1:[1m4174[22m/[39m
+[2m9:30:33 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/features/dashboard/DashboardPage.tsx[22m
+[2m9:30:59 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/styles/globals.css[22m
+[2m9:31:24 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/styles/globals.css[22m
+[2m9:31:44 PM[22m [36m[1m[vite][22m[39m [32mvite.config.js changed, restarting server...[39m
+[2m9:31:44 PM[22m [36m[1m[vite][22m[39m server restarted.
+[2m10:27:46 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/features/dashboard/DashboardPage.tsx, /src/components/charts/ChartPanel.tsx[22m
+[2m10:28:05 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/charts/ChartPanel.tsx[22m
+[2m10:28:11 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/styles/globals.css[22m
+[2m10:28:30 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/features/dashboard/DashboardPage.tsx[22m
+[2m10:28:45 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/features/dashboard/DashboardPage.tsx[22m
+[2m10:46:15 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/features/dashboard/DashboardPage.tsx[22m
+[2m10:51:40 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/features/dashboard/DashboardPage.tsx[22m

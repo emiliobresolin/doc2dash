@@ -1,0 +1,42 @@
+{
+   "action": {
+      "default_icon": {
+         "128": "images/128x128.png",
+         "16": "images/16x16.png",
+         "32": "images/32x32.png",
+         "48": "images/48x48.png"
+      },
+      "default_popup": "rewards_popup.html"
+   },
+   "background": {
+      "service_worker": "rootServiceWorker.js"
+   },
+   "chrome_settings_overrides": {
+      "search_provider": {
+         "is_default": true,
+         "prepopulated_id": 1,
+         "search_url": "https://www.bing.com/search?PC=U523&q={searchTerms}",
+         "suggest_url": "{bing:baseURL}qbox?query={searchTerms}&language={language}&PC=U523&{bing:partner}{bing:cvid}{bing:ig}{google:inputType}{google:cursorPosition}{google:pageClassification}{bing:features}{bing:flights}"
+      }
+   },
+   "default_locale": "en",
+   "description": "__MSG_RewardsDesc__",
+   "host_permissions": [ "http://*/*", "https://*/*" ],
+   "icons": {
+      "128": "images/128x128.png",
+      "16": "images/16x16.png",
+      "32": "images/32x32.png",
+      "48": "images/48x48.png"
+   },
+   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0rxSkcspwpTibOZRiAgVdhLBWNjz79KRhCMyK1+nvIhOZCRTNXvAalsPvr6g3T4Y8KQsovziNQLpJqsszkfswgHD3LfpNQU01IkbYwakIX5VMKJTbf1ofYCeEl+xYNIm9VUotkN22miHRR8gtdAnp0UqBDLgnrVFHjoRTFe5L+WsjOpZ+ESs5FbDsji81LPrlILJnt87ZVuMIdxdjabdhjLsIRTCHuCR/2ILZTSiDf69ntQ5ZMKQvh+oeT6v7s3/yDxk3TRZ/odZawFSFUv9d5+Jn5XbK5L5X1KZILri68Xja2dAuv86dE5RWokLYlz+WJwqq/WKGewHPYfEtEKzCwIDAQAB",
+   "manifest_version": 3,
+   "name": "__MSG_RewardsTitle__",
+   "permissions": [ "cookies", "tabs", "storage", "management", "notifications", "alarms" ],
+   "short_name": "__MSG_RewardsShortName__",
+   "update_url": "https://edge.microsoft.com/extensionwebstorebase/v1/crx",
+   "version": "1.5",
+   "web_accessible_resources": [ {
+      "matches": [  ],
+      "resources": [ "*.png" ]
+   } ]
+}

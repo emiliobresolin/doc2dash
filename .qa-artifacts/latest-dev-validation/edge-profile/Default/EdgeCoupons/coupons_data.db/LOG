@@ -1,0 +1,10 @@
+2026/04/13-11:55:56.993 6594 Reusing MANIFEST C:\Users\emili\Desktop\Projets\doc2dash\.qa-artifacts\latest-dev-validation\edge-profile\Default\EdgeCoupons/coupons_data.db/MANIFEST-000001
+2026/04/13-11:55:56.994 6594 Recovering log #16
+2026/04/13-11:55:56.995 6594 Reusing old log C:\Users\emili\Desktop\Projets\doc2dash\.qa-artifacts\latest-dev-validation\edge-profile\Default\EdgeCoupons/coupons_data.db/000016.log 
+2026/04/13-11:55:57.026 66a8 Level-0 table #20: started
+2026/04/13-11:55:57.029 66a8 Level-0 table #20: 682276 bytes OK
+2026/04/13-11:55:57.031 66a8 Delete type=0 #16
+2026/04/13-11:55:57.032 66a8 Compacting 4@0 + 1@1 files
+2026/04/13-11:55:57.037 66a8 Generated table #21@0: 4 keys, 682184 bytes
+2026/04/13-11:55:57.038 66a8 Compacted 4@0 + 1@1 files => 682184 bytes
+2026/04/13-11:55:57.039 66a8 compacted to: files[ 0 1 1 0 0 0 0 ]

@@ -1,0 +1,6 @@
+2026/04/13-11:52:43.430 6348 Reusing MANIFEST C:\Users\emili\Desktop\Projets\doc2dash\.qa-artifacts\latest-dev-validation\edge-profile\Default\Sync Data\LevelDB/MANIFEST-000001
+2026/04/13-11:52:43.432 6348 Recovering log #3
+2026/04/13-11:52:43.436 6348 Reusing old log C:\Users\emili\Desktop\Projets\doc2dash\.qa-artifacts\latest-dev-validation\edge-profile\Default\Sync Data\LevelDB/000003.log 
+2026/04/13-11:52:44.449 74f4 Level-0 table #5: started
+2026/04/13-11:52:44.453 74f4 Level-0 table #5: 114043 bytes OK
+2026/04/13-11:52:44.454 74f4 Delete type=0 #3

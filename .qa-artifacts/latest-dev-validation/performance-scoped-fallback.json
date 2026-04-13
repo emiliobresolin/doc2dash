@@ -1,0 +1,37 @@
+{
+  "url": "http://127.0.0.1:4175/uploads/upl_bLkMlIL5TyLE",
+  "previewClass": "workspace-card workspace-card--preview workspace-card--preview-wide",
+  "chartClass": null,
+  "scopedClass": "workspace-card workspace-card--scope",
+  "previewRect": {
+    "x": 336,
+    "y": 544,
+    "width": 1206.984375,
+    "height": 545.75
+  },
+  "chartRect": null,
+  "focusValue": null,
+  "focusOptions": [],
+  "badges": [
+    "Trusted",
+    "Confidence: 92%",
+    "Transformation: Skipped",
+    "Chart provenance: Generated",
+    "12 matches",
+    "browserVersion",
+    "Mode: chart",
+    "Scoped result active",
+    "Confidence: 92%",
+    "Orientation: not_safely_normalizable",
+    "Source: eventLogs_bulk",
+    "Scoped charts",
+    "Provenance: generated",
+    "Default: table",
+    "Provenance: Generated",
+    "Selected: Table",
+    "Focus: Readable table view",
+    "Table: tbl_02_01",
+    "Rows: 3",
+    "Scoped rows"
+  ]
+}

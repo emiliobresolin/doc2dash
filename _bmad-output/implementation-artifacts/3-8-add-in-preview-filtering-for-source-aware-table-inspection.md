@@ -131,6 +131,7 @@ GPT-5 Codex
 - Extended the existing preview API with a table-scoped `filter` parameter so pagination and filtered row counts remain correct on large datasets.
 - Reset preview pagination when the local filter changes and added a distinct no-match message for preview filtering.
 - Kept local preview filtering confined to the active search-scoped result when scoped presentation is active, and cleared that local filter on scoped-state exit.
+- Followed up on integrated layout QA by bounding preview-table overflow and clamping dense cell content so preview-local filtering remains useful without stretching the full dashboard.
 
 ### File List
 
@@ -147,3 +148,4 @@ GPT-5 Codex
 
 - 2026-04-12: Story created from the real-demo request for preview-table filtering and the corrective fixture-hardening slice.
 - 2026-04-12: Added table-scoped preview filtering with page reset behavior, scoped-search compatibility, backend preview filtering support, and regression coverage.
+- 2026-04-12: Refined preview containment so large filtered tables remain bounded inside the dashboard instead of deforming the page layout.

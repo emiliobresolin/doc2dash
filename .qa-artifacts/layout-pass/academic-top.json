@@ -1,0 +1,58 @@
+{
+  "viewport": {
+    "width": 1600,
+    "height": 1200
+  },
+  "documentHeight": 1200,
+  "scrollY": 0,
+  "sidebar": {
+    "x": 18,
+    "y": 18,
+    "width": 300,
+    "height": 1164,
+    "scrollHeight": 2176,
+    "clientHeight": 1162,
+    "overflowY": "auto"
+  },
+  "masthead": {
+    "x": 336,
+    "y": 18,
+    "width": 1246,
+    "height": 248
+  },
+  "cards": [
+    {
+      "index": 0,
+      "heading": "Readable first view",
+      "hidden": false,
+      "x": 336,
+      "y": 284,
+      "width": 403.328125,
+      "height": 429,
+      "scrollHeight": 427,
+      "clientHeight": 427
+    },
+    {
+      "index": 1,
+      "heading": "Presentation slot",
+      "hidden": false,
+      "x": 757.328125,
+      "y": 284,
+      "width": 403.328125,
+      "height": 875,
+      "scrollHeight": 873,
+      "clientHeight": 873
+    },
+    {
+      "index": 2,
+      "heading": "Source-aware rows",
+      "hidden": false,
+      "x": 1178.65625,
+      "y": 284,
+      "width": 403.34375,
+      "height": 772,
+      "scrollHeight": 770,
+      "clientHeight": 770
+    }
+  ]
+}

@@ -2,8 +2,8 @@ import type {
   ChartRecommendation,
   ChartSourceType,
   ChartType,
-  TableSummary,
 } from "../types/manifest";
+import type { ChartConfigLike } from "./scopedCharts";
 
 const chartLabels: Record<ChartType, string> = {
   area: "Area",
@@ -29,7 +29,7 @@ export function formatChartSourceLabel(chartSourceType: ChartSourceType) {
 }
 
 export function getSafeChartType(
-  table: TableSummary,
+  table: ChartConfigLike,
   requestedChartType: ChartType | null,
 ): ChartType {
   if (requestedChartType && table.availableChartTypes.includes(requestedChartType)) {
@@ -44,7 +44,7 @@ export function getSafeChartType(
 }
 
 export function getChartRecommendation(
-  table: TableSummary,
+  table: ChartConfigLike,
   chartType: ChartType,
 ): ChartRecommendation {
   return (

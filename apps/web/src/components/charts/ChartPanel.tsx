@@ -6,15 +6,15 @@ import {
   getChartRecommendation,
   getSafeChartType,
 } from "../../lib/charts";
-import type {
-  ChartRecommendation,
-  ChartType,
-  TableSummary,
-} from "../../types/manifest";
+import type { ChartRecommendation, ChartType } from "../../types/manifest";
+import type { ChartConfigLike, ScopedChartOption } from "../../lib/scopedCharts";
 
 interface ChartPanelProps {
-  table: TableSummary;
+  chartOptions?: ScopedChartOption[];
+  onSelectChartOption?: (optionKey: string) => void;
   selectedChartType: ChartType;
+  selectedChartOptionKey?: string | null;
+  table: ChartConfigLike;
   onSelect: (chartType: ChartType) => void;
 }
 
@@ -33,17 +33,44 @@ const plotlyConfig = {
 } as const;
 
 export function ChartPanel({
+  chartOptions,
+  onSelectChartOption,
   table,
   selectedChartType,
+  selectedChartOptionKey,
   onSelect,
 }: ChartPanelProps) {
-  const activeChartType = getSafeChartType(table, selectedChartType);
-  const recommendation = getChartRecommendation(table, activeChartType);
+  const activeOption =
+    chartOptions?.find((option) => option.key === selectedChartOptionKey) ??
+    chartOptions?.[0] ??
+    null;
+  const chartTable = activeOption?.table ?? table;
+  const activeChartType = getSafeChartType(chartTable, selectedChartType);
+  const recommendation = getChartRecommendation(chartTable, activeChartType);
 
   return (
     <div className="chart-panel">
+      {chartOptions && chartOptions.length > 1 ? (
+        <div className="chart-panel__focus-picker">
+          <label className="search-panel__label" htmlFor="chart-focus">
+            Chart focus
+          </label>
+          <select
+            className="chart-panel__focus-select"
+            id="chart-focus"
+            onChange={(event) => onSelectChartOption?.(event.target.value)}
+            value={activeOption?.key ?? chartOptions[0]?.key ?? ""}
+          >
+            {chartOptions.map((option) => (
+              <option key={option.key} value={option.key}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </div>
+      ) : null}
       <div className="chart-switcher" role="toolbar" aria-label="Chart type options">
-        {table.availableChartTypes.map((chartType) => (
+        {chartTable.availableChartTypes.map((chartType) => (
           <button
             key={chartType}
             aria-pressed={chartType === activeChartType}
@@ -62,18 +89,19 @@ export function ChartPanel({
 
       <div className="chart-panel__meta">
         <span className="badge">
-          Provenance: {formatChartSourceLabel(table.chartSourceType)}
+          Provenance: {formatChartSourceLabel(chartTable.chartSourceType)}
         </span>
         <span className="badge">
           Selected: {formatChartTypeLabel(activeChartType)}
         </span>
+        {activeOption ? <span className="badge">Focus: {activeOption.label}</span> : null}
         {recommendation.truncated ? (
           <span className="badge">Trimmed for readability</span>
         ) : null}
       </div>
 
       <p className="card-copy">{recommendation.description}</p>
-      <p className="provenance-copy">{table.chartSourceReason}</p>
+      <p className="provenance-copy">{chartTable.chartSourceReason}</p>
 
       <figure className="chart-figure">
         <figcaption className="chart-figure__title">{recommendation.title}</figcaption>

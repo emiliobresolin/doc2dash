@@ -1,0 +1,211 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/features/upload/UploadPage.tsx");import __vite__cjsImport0_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=d6ce914f"; const jsxDEV = __vite__cjsImport0_react_jsxDevRuntime["jsxDEV"];
+import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== "undefined" && self instanceof WorkerGlobalScope;
+let prevRefreshReg;
+let prevRefreshSig;
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react can't detect preamble. Something is wrong."
+    );
+  }
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("C:/Users/emili/Desktop/Projets/doc2dash/apps/web/src/features/upload/UploadPage.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+var _s = $RefreshSig$();
+import __vite__cjsImport3_react from "/node_modules/.vite/deps/react.js?v=d6ce914f"; const useState = __vite__cjsImport3_react["useState"];
+import { useNavigate } from "/node_modules/.vite/deps/react-router-dom.js?v=d6ce914f";
+import { createUpload } from "/src/lib/api.ts";
+const maxUploadSizeBytes = 30 * 1024 * 1024;
+const acceptedExtensions = [".xlsx", ".csv"];
+function validateSelectedFile(file) {
+  if (!file) {
+    return "Choose a .xlsx or .csv report to continue.";
+  }
+  const fileName = file.name.toLowerCase();
+  const matchesExtension = acceptedExtensions.some(
+    (extension) => fileName.endsWith(extension)
+  );
+  if (!matchesExtension) {
+    return "doc2dash accepts only .xlsx and .csv files.";
+  }
+  if (file.size > maxUploadSizeBytes) {
+    return "Files must be 30 MB or smaller.";
+  }
+  return null;
+}
+export function UploadPage() {
+  _s();
+  const navigate = useNavigate();
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [errorMessage, setErrorMessage] = useState(null);
+  const [statusMessage, setStatusMessage] = useState(
+    "Choose a workbook to start the browser upload flow."
+  );
+  const [uploading, setUploading] = useState(false);
+  function handleFileChange(file) {
+    setSelectedFile(file);
+    const validationMessage = validateSelectedFile(file);
+    setErrorMessage(validationMessage);
+    if (file && !validationMessage) {
+      setStatusMessage(`Ready to upload ${file.name}.`);
+      return;
+    }
+    setStatusMessage("Choose a workbook to start the browser upload flow.");
+  }
+  async function handleSubmit(event) {
+    event.preventDefault();
+    const validationMessage = validateSelectedFile(selectedFile);
+    if (validationMessage) {
+      setErrorMessage(validationMessage);
+      setStatusMessage("Upload blocked until the selected file is valid.");
+      return;
+    }
+    if (!selectedFile) {
+      return;
+    }
+    setUploading(true);
+    setErrorMessage(null);
+    setStatusMessage("Uploading workbook and preparing dashboard handoff...");
+    try {
+      const upload = await createUpload(selectedFile);
+      navigate(`/uploads/${upload.uploadId}`, {
+        state: {
+          uploadAcknowledged: {
+            fileName: selectedFile.name
+          }
+        }
+      });
+    } catch (error) {
+      setErrorMessage(
+        error instanceof Error ? error.message : "We couldn't upload this workbook."
+      );
+      setStatusMessage("Upload failed. Review the message and try again.");
+      setUploading(false);
+    }
+  }
+  return /* @__PURE__ */ jsxDEV("main", { className: "home-shell", children: /* @__PURE__ */ jsxDEV("div", { className: "home-card upload-card", children: [
+    /* @__PURE__ */ jsxDEV("p", { className: "eyebrow", children: "doc2dash" }, void 0, false, {
+      fileName: "C:/Users/emili/Desktop/Projets/doc2dash/apps/web/src/features/upload/UploadPage.tsx",
+      lineNumber: 107,
+      columnNumber: 9
+    }, this),
+    /* @__PURE__ */ jsxDEV("h1", { children: "Upload a report and open its dashboard in one browser flow." }, void 0, false, {
+      fileName: "C:/Users/emili/Desktop/Projets/doc2dash/apps/web/src/features/upload/UploadPage.tsx",
+      lineNumber: 108,
+      columnNumber: 9
+    }, this),
+    /* @__PURE__ */ jsxDEV("p", { className: "upload-card__copy", children: [
+      "Supported files: ",
+      /* @__PURE__ */ jsxDEV("strong", { children: ".xlsx" }, void 0, false, {
+        fileName: "C:/Users/emili/Desktop/Projets/doc2dash/apps/web/src/features/upload/UploadPage.tsx",
+        lineNumber: 110,
+        columnNumber: 28
+      }, this),
+      " and ",
+      /* @__PURE__ */ jsxDEV("strong", { children: ".csv" }, void 0, false, {
+        fileName: "C:/Users/emili/Desktop/Projets/doc2dash/apps/web/src/features/upload/UploadPage.tsx",
+        lineNumber: 110,
+        columnNumber: 55
+      }, this),
+      ", up to",
+      " ",
+      /* @__PURE__ */ jsxDEV("strong", { children: "30 MB" }, void 0, false, {
+        fileName: "C:/Users/emili/Desktop/Projets/doc2dash/apps/web/src/features/upload/UploadPage.tsx",
+        lineNumber: 111,
+        columnNumber: 11
+      }, this),
+      ". After upload, doc2dash will take you straight into the generated dashboard route."
+    ] }, void 0, true, {
+      fileName: "C:/Users/emili/Desktop/Projets/doc2dash/apps/web/src/features/upload/UploadPage.tsx",
+      lineNumber: 109,
+      columnNumber: 9
+    }, this),
+    /* @__PURE__ */ jsxDEV("form", { className: "upload-form", onSubmit: handleSubmit, children: [
+      /* @__PURE__ */ jsxDEV("label", { className: "upload-form__label", htmlFor: "report-upload", children: "Spreadsheet report" }, void 0, false, {
+        fileName: "C:/Users/emili/Desktop/Projets/doc2dash/apps/web/src/features/upload/UploadPage.tsx",
+        lineNumber: 116,
+        columnNumber: 11
+      }, this),
+      /* @__PURE__ */ jsxDEV(
+        "input",
+        {
+          accept: ".xlsx,.csv,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+          className: "upload-form__input",
+          disabled: uploading,
+          id: "report-upload",
+          name: "file",
+          onChange: (event) => handleFileChange(event.target.files?.[0] ?? null),
+          type: "file"
+        },
+        void 0,
+        false,
+        {
+          fileName: "C:/Users/emili/Desktop/Projets/doc2dash/apps/web/src/features/upload/UploadPage.tsx",
+          lineNumber: 119,
+          columnNumber: 11
+        },
+        this
+      ),
+      selectedFile ? /* @__PURE__ */ jsxDEV("p", { className: "upload-form__file", "aria-live": "polite", children: [
+        "Selected: ",
+        selectedFile.name
+      ] }, void 0, true, {
+        fileName: "C:/Users/emili/Desktop/Projets/doc2dash/apps/web/src/features/upload/UploadPage.tsx",
+        lineNumber: 130,
+        columnNumber: 11
+      }, this) : null,
+      /* @__PURE__ */ jsxDEV("button", { className: "primary-action", disabled: uploading, type: "submit", children: uploading ? "Uploading..." : "Upload report" }, void 0, false, {
+        fileName: "C:/Users/emili/Desktop/Projets/doc2dash/apps/web/src/features/upload/UploadPage.tsx",
+        lineNumber: 135,
+        columnNumber: 11
+      }, this)
+    ] }, void 0, true, {
+      fileName: "C:/Users/emili/Desktop/Projets/doc2dash/apps/web/src/features/upload/UploadPage.tsx",
+      lineNumber: 115,
+      columnNumber: 9
+    }, this),
+    /* @__PURE__ */ jsxDEV("p", { className: "upload-form__status", "aria-live": "polite", children: statusMessage }, void 0, false, {
+      fileName: "C:/Users/emili/Desktop/Projets/doc2dash/apps/web/src/features/upload/UploadPage.tsx",
+      lineNumber: 140,
+      columnNumber: 9
+    }, this),
+    errorMessage ? /* @__PURE__ */ jsxDEV("p", { className: "upload-form__error", role: "alert", children: errorMessage }, void 0, false, {
+      fileName: "C:/Users/emili/Desktop/Projets/doc2dash/apps/web/src/features/upload/UploadPage.tsx",
+      lineNumber: 145,
+      columnNumber: 9
+    }, this) : null
+  ] }, void 0, true, {
+    fileName: "C:/Users/emili/Desktop/Projets/doc2dash/apps/web/src/features/upload/UploadPage.tsx",
+    lineNumber: 106,
+    columnNumber: 7
+  }, this) }, void 0, false, {
+    fileName: "C:/Users/emili/Desktop/Projets/doc2dash/apps/web/src/features/upload/UploadPage.tsx",
+    lineNumber: 105,
+    columnNumber: 5
+  }, this);
+}
+_s(UploadPage, "MCQa7nOzL5x7aE1lGGQ99SC8zk4=", false, function() {
+  return [useNavigate];
+});
+_c = UploadPage;
+var _c;
+$RefreshReg$(_c, "UploadPage");
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("C:/Users/emili/Desktop/Projets/doc2dash/apps/web/src/features/upload/UploadPage.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("C:/Users/emili/Desktop/Projets/doc2dash/apps/web/src/features/upload/UploadPage.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,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RUEsSUFDRTtBQUFBLE9BMUNOO0FBQUE7QUFBQTtBQUFBO0FBQUEsU0EyQ0EsS0E1Q0Y7QUFBQTtBQUFBO0FBQUE7QUFBQSxTQTZDQTtBQUVKO0FBQUNKLEdBeEdlRCxZQUFVO0FBQUEsVUFDUGQsV0FBVztBQUFBO0FBQUEsS0FEZGM7QUFBVSxJQUFBeUI7QUFBQSxhQUFBQSxJQUFBIiwibmFtZXMiOlsidXNlU3RhdGUiLCJ1c2VOYXZpZ2F0ZSIsImNyZWF0ZVVwbG9hZCIsIm1heFVwbG9hZFNpemVCeXRlcyIsImFjY2VwdGVkRXh0ZW5zaW9ucyIsInZhbGlkYXRlU2VsZWN0ZWRGaWxlIiwiZmlsZSIsImZpbGVOYW1lIiwibmFtZSIsInRvTG93ZXJDYXNlIiwibWF0Y2hlc0V4dGVuc2lvbiIsInNvbWUiLCJleHRlbnNpb24iLCJlbmRzV2l0aCIsInNpemUiLCJVcGxvYWRQYWdlIiwiX3MiLCJuYXZpZ2F0ZSIsInNlbGVjdGVkRmlsZSIsInNldFNlbGVjdGVkRmlsZSIsImVycm9yTWVzc2FnZSIsInNldEVycm9yTWVzc2FnZSIsInN0YXR1c01lc3NhZ2UiLCJzZXRTdGF0dXNNZXNzYWdlIiwidXBsb2FkaW5nIiwic2V0VXBsb2FkaW5nIiwiaGFuZGxlRmlsZUNoYW5nZSIsInZhbGlkYXRpb25NZXNzYWdlIiwiaGFuZGxlU3VibWl0IiwiZXZlbnQiLCJwcmV2ZW50RGVmYXVsdCIsInVwbG9hZCIsInVwbG9hZElkIiwic3RhdGUiLCJ1cGxvYWRBY2tub3dsZWRnZWQiLCJlcnJvciIsIkVycm9yIiwibWVzc2FnZSIsInRhcmdldCIsImZpbGVzIiwiX2MiXSwiaWdub3JlTGlzdCI6W10sInNvdXJjZXMiOlsiVXBsb2FkUGFnZS50c3giXSwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IHsgdXNlU3RhdGUgfSBmcm9tIFwicmVhY3RcIjtcclxuaW1wb3J0IHsgdXNlTmF2aWdhdGUgfSBmcm9tIFwicmVhY3Qtcm91dGVyLWRvbVwiO1xyXG5cclxuaW1wb3J0IHsgY3JlYXRlVXBsb2FkIH0gZnJvbSBcIi4uLy4uL2xpYi9hcGlcIjtcclxuXHJcbmNvbnN0IG1heFVwbG9hZFNpemVCeXRlcyA9IDMwICogMTAyNCAqIDEwMjQ7XHJcbmNvbnN0IGFjY2VwdGVkRXh0ZW5zaW9ucyA9IFtcIi54bHN4XCIsIFwiLmNzdlwiXTtcclxuXHJcbmZ1bmN0aW9uIHZhbGlkYXRlU2VsZWN0ZWRGaWxlKGZpbGU6IEZpbGUgfCBudWxsKSB7XHJcbiAgaWYgKCFmaWxlKSB7XHJcbiAgICByZXR1cm4gXCJDaG9vc2UgYSAueGxzeCBvciAuY3N2IHJlcG9ydCB0byBjb250aW51ZS5cIjtcclxuICB9XHJcblxyXG4gIGNvbnN0IGZpbGVOYW1lID0gZmlsZS5uYW1lLnRvTG93ZXJDYXNlKCk7XHJcbiAgY29uc3QgbWF0Y2hlc0V4dGVuc2lvbiA9IGFjY2VwdGVkRXh0ZW5zaW9ucy5zb21lKChleHRlbnNpb24pID0+XHJcbiAgICBmaWxlTmFtZS5lbmRzV2l0aChleHRlbnNpb24pLFxyXG4gICk7XHJcbiAgaWYgKCFtYXRjaGVzRXh0ZW5zaW9uKSB7XHJcbiAgICByZXR1cm4gXCJkb2MyZGFzaCBhY2NlcHRzIG9ubHkgLnhsc3ggYW5kIC5jc3YgZmlsZXMuXCI7XHJcbiAgfVxyXG5cclxuICBpZiAoZmlsZS5zaXplID4gbWF4VXBsb2FkU2l6ZUJ5dGVzKSB7XHJcbiAgICByZXR1cm4gXCJGaWxlcyBtdXN0IGJlIDMwIE1CIG9yIHNtYWxsZXIuXCI7XHJcbiAgfVxyXG5cclxuICByZXR1cm4gbnVsbDtcclxufVxyXG5cclxuZXhwb3J0IGZ1bmN0aW9uIFVwbG9hZFBhZ2UoKSB7XHJcbiAgY29uc3QgbmF2aWdhdGUgPSB1c2VOYXZpZ2F0ZSgpO1xyXG4gIGNvbnN0IFtzZWxlY3RlZEZpbGUsIHNldFNlbGVjdGVkRmlsZV0gPSB1c2VTdGF0ZTxGaWxlIHwgbnVsbD4obnVsbCk7XHJcbiAgY29uc3QgW2Vycm9yTWVzc2FnZSwgc2V0RXJyb3JNZXNzYWdlXSA9IHVzZVN0YXRlPHN0cmluZyB8IG51bGw+KG51bGwpO1xyXG4gIGNvbnN0IFtzdGF0dXNNZXNzYWdlLCBzZXRTdGF0dXNNZXNzYWdlXSA9IHVzZVN0YXRlKFxyXG4gICAgXCJDaG9vc2UgYSB3b3JrYm9vayB0byBzdGFydCB0aGUgYnJvd3NlciB1cGxvYWQgZmxvdy5cIixcclxuICApO1xyXG4gIGNvbnN0IFt1cGxvYWRpbmcsIHNldFVwbG9hZGluZ10gPSB1c2VTdGF0ZShmYWxzZSk7XHJcblxyXG4gIGZ1bmN0aW9uIGhhbmRsZUZpbGVDaGFuZ2UoZmlsZTogRmlsZSB8IG51bGwpIHtcclxuICAgIHNldFNlbGVjdGVkRmlsZShmaWxlKTtcclxuICAgIGNvbnN0IHZhbGlkYXRpb25NZXNzYWdlID0gdmFsaWRhdGVTZWxlY3RlZEZpbGUoZmlsZSk7XHJcbiAgICBzZXRFcnJvck1lc3NhZ2UodmFsaWRhdGlvbk1lc3NhZ2UpO1xyXG4gICAgaWYgKGZpbGUgJiYgIXZhbGlkYXRpb25NZXNzYWdlKSB7XHJcbiAgICAgIHNldFN0YXR1c01lc3NhZ2UoYFJlYWR5IHRvIHVwbG9hZCAke2ZpbGUubmFtZX0uYCk7XHJcbiAgICAgIHJldHVybjtcclxuICAgIH1cclxuXHJcbiAgICBzZXRTdGF0dXNNZXNzYWdlKFwiQ2hvb3NlIGEgd29ya2Jvb2sgdG8gc3RhcnQgdGhlIGJyb3dzZXIgdXBsb2FkIGZsb3cuXCIpO1xyXG4gIH1cclxuXHJcbiAgYXN5bmMgZnVuY3Rpb24gaGFuZGxlU3VibWl0KGV2ZW50OiBSZWFjdC5Gb3JtRXZlbnQ8SFRNTEZvcm1FbGVtZW50Pikge1xyXG4gICAgZXZlbnQucHJldmVudERlZmF1bHQoKTtcclxuICAgIGNvbnN0IHZhbGlkYXRpb25NZXNzYWdlID0gdmFsaWRhdGVTZWxlY3RlZEZpbGUoc2VsZWN0ZWRGaWxlKTtcclxuICAgIGlmICh2YWxpZGF0aW9uTWVzc2FnZSkge1xyXG4gICAgICBzZXRFcnJvck1lc3NhZ2UodmFsaWRhdGlvbk1lc3NhZ2UpO1xyXG4gICAgICBzZXRTdGF0dXNNZXNzYWdlKFwiVXBsb2FkIGJsb2NrZWQgdW50aWwgdGhlIHNlbGVjdGVkIGZpbGUgaXMgdmFsaWQuXCIpO1xyXG4gICAgICByZXR1cm47XHJcbiAgICB9XHJcblxyXG4gICAgaWYgKCFzZWxlY3RlZEZpbGUpIHtcclxuICAgICAgcmV0dXJuO1xyXG4gICAgfVxyXG5cclxuICAgIHNldFVwbG9hZGluZyh0cnVlKTtcclxuICAgIHNldEVycm9yTWVzc2FnZShudWxsKTtcclxuICAgIHNldFN0YXR1c01lc3NhZ2UoXCJVcGxvYWRpbmcgd29ya2Jvb2sgYW5kIHByZXBhcmluZyBkYXNoYm9hcmQgaGFuZG9mZi4uLlwiKTtcclxuXHJcbiAgICB0cnkge1xyXG4gICAgICBjb25zdCB1cGxvYWQgPSBhd2FpdCBjcmVhdGVVcGxvYWQoc2VsZWN0ZWRGaWxlKTtcclxuICAgICAgbmF2aWdhdGUoYC91cGxvYWRzLyR7dXBsb2FkLnVwbG9hZElkfWAsIHtcclxuICAgICAgICBzdGF0ZToge1xyXG4gICAgICAgICAgdXBsb2FkQWNrbm93bGVkZ2VkOiB7XHJcbiAgICAgICAgICAgIGZpbGVOYW1lOiBzZWxlY3RlZEZpbGUubmFtZSxcclxuICAgICAgICAgIH0sXHJcbiAgICAgICAgfSxcclxuICAgICAgfSk7XHJcbiAgICB9IGNhdGNoIChlcnJvcikge1xyXG4gICAgICBzZXRFcnJvck1lc3NhZ2UoXHJcbiAgICAgICAgZXJyb3IgaW5zdGFuY2VvZiBFcnJvciA/IGVycm9yLm1lc3NhZ2UgOiBcIldlIGNvdWxkbid0IHVwbG9hZCB0aGlzIHdvcmtib29rLlwiLFxyXG4gICAgICApO1xyXG4gICAgICBzZXRTdGF0dXNNZXNzYWdlKFwiVXBsb2FkIGZhaWxlZC4gUmV2aWV3IHRoZSBtZXNzYWdlIGFuZCB0cnkgYWdhaW4uXCIpO1xyXG4gICAgICBzZXRVcGxvYWRpbmcoZmFsc2UpO1xyXG4gICAgfVxyXG4gIH1cclxuXHJcbiAgcmV0dXJuIChcclxuICAgIDxtYWluIGNsYXNzTmFtZT1cImhvbWUtc2hlbGxcIj5cclxuICAgICAgPGRpdiBjbGFzc05hbWU9XCJob21lLWNhcmQgdXBsb2FkLWNhcmRcIj5cclxuICAgICAgICA8cCBjbGFzc05hbWU9XCJleWVicm93XCI+ZG9jMmRhc2g8L3A+XHJcbiAgICAgICAgPGgxPlVwbG9hZCBhIHJlcG9ydCBhbmQgb3BlbiBpdHMgZGFzaGJvYXJkIGluIG9uZSBicm93c2VyIGZsb3cuPC9oMT5cclxuICAgICAgICA8cCBjbGFzc05hbWU9XCJ1cGxvYWQtY2FyZF9fY29weVwiPlxyXG4gICAgICAgICAgU3VwcG9ydGVkIGZpbGVzOiA8c3Ryb25nPi54bHN4PC9zdHJvbmc+IGFuZCA8c3Ryb25nPi5jc3Y8L3N0cm9uZz4sIHVwIHRve1wiIFwifVxyXG4gICAgICAgICAgPHN0cm9uZz4zMCBNQjwvc3Ryb25nPi4gQWZ0ZXIgdXBsb2FkLCBkb2MyZGFzaCB3aWxsIHRha2UgeW91IHN0cmFpZ2h0IGludG8gdGhlXHJcbiAgICAgICAgICBnZW5lcmF0ZWQgZGFzaGJvYXJkIHJvdXRlLlxyXG4gICAgICAgIDwvcD5cclxuXHJcbiAgICAgICAgPGZvcm0gY2xhc3NOYW1lPVwidXBsb2FkLWZvcm1cIiBvblN1Ym1pdD17aGFuZGxlU3VibWl0fT5cclxuICAgICAgICAgIDxsYWJlbCBjbGFzc05hbWU9XCJ1cGxvYWQtZm9ybV9fbGFiZWxcIiBodG1sRm9yPVwicmVwb3J0LXVwbG9hZFwiPlxyXG4gICAgICAgICAgICBTcHJlYWRzaGVldCByZXBvcnRcclxuICAgICAgICAgIDwvbGFiZWw+XHJcbiAgICAgICAgICA8aW5wdXRcclxuICAgICAgICAgICAgYWNjZXB0PVwiLnhsc3gsLmNzdix0ZXh0L2NzdixhcHBsaWNhdGlvbi92bmQub3BlbnhtbGZvcm1hdHMtb2ZmaWNlZG9jdW1lbnQuc3ByZWFkc2hlZXRtbC5zaGVldFwiXHJcbiAgICAgICAgICAgIGNsYXNzTmFtZT1cInVwbG9hZC1mb3JtX19pbnB1dFwiXHJcbiAgICAgICAgICAgIGRpc2FibGVkPXt1cGxvYWRpbmd9XHJcbiAgICAgICAgICAgIGlkPVwicmVwb3J0LXVwbG9hZFwiXHJcbiAgICAgICAgICAgIG5hbWU9XCJmaWxlXCJcclxuICAgICAgICAgICAgb25DaGFuZ2U9eyhldmVudCkgPT4gaGFuZGxlRmlsZUNoYW5nZShldmVudC50YXJnZXQuZmlsZXM/LlswXSA/PyBudWxsKX1cclxuICAgICAgICAgICAgdHlwZT1cImZpbGVcIlxyXG4gICAgICAgICAgLz5cclxuXHJcbiAgICAgICAgICB7c2VsZWN0ZWRGaWxlID8gKFxyXG4gICAgICAgICAgICA8cCBjbGFzc05hbWU9XCJ1cGxvYWQtZm9ybV9fZmlsZVwiIGFyaWEtbGl2ZT1cInBvbGl0ZVwiPlxyXG4gICAgICAgICAgICAgIFNlbGVjdGVkOiB7c2VsZWN0ZWRGaWxlLm5hbWV9XHJcbiAgICAgICAgICAgIDwvcD5cclxuICAgICAgICAgICkgOiBudWxsfVxyXG5cclxuICAgICAgICAgIDxidXR0b24gY2xhc3NOYW1lPVwicHJpbWFyeS1hY3Rpb25cIiBkaXNhYmxlZD17dXBsb2FkaW5nfSB0eXBlPVwic3VibWl0XCI+XHJcbiAgICAgICAgICAgIHt1cGxvYWRpbmcgPyBcIlVwbG9hZGluZy4uLlwiIDogXCJVcGxvYWQgcmVwb3J0XCJ9XHJcbiAgICAgICAgICA8L2J1dHRvbj5cclxuICAgICAgICA8L2Zvcm0+XHJcblxyXG4gICAgICAgIDxwIGNsYXNzTmFtZT1cInVwbG9hZC1mb3JtX19zdGF0dXNcIiBhcmlhLWxpdmU9XCJwb2xpdGVcIj5cclxuICAgICAgICAgIHtzdGF0dXNNZXNzYWdlfVxyXG4gICAgICAgIDwvcD5cclxuXHJcbiAgICAgICAge2Vycm9yTWVzc2FnZSA/IChcclxuICAgICAgICAgIDxwIGNsYXNzTmFtZT1cInVwbG9hZC1mb3JtX19lcnJvclwiIHJvbGU9XCJhbGVydFwiPlxyXG4gICAgICAgICAgICB7ZXJyb3JNZXNzYWdlfVxyXG4gICAgICAgICAgPC9wPlxyXG4gICAgICAgICkgOiBudWxsfVxyXG4gICAgICA8L2Rpdj5cclxuICAgIDwvbWFpbj5cclxuICApO1xyXG59XHJcbiJdLCJmaWxlIjoiQzovVXNlcnMvZW1pbGkvRGVza3RvcC9Qcm9qZXRzL2RvYzJkYXNoL2FwcHMvd2ViL3NyYy9mZWF0dXJlcy91cGxvYWQvVXBsb2FkUGFnZS50c3gifQ==

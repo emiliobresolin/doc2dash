@@ -1,0 +1,46 @@
+{
+  "url": "http://127.0.0.1:4175/uploads/upl_Fe1AVFWnMWo2",
+  "previewClass": "workspace-card workspace-card--preview workspace-card--preview-wide",
+  "chartClass": null,
+  "scopedClass": "workspace-card workspace-card--scope",
+  "previewRect": {
+    "x": 336,
+    "y": 564,
+    "width": 1206.984375,
+    "height": 530.75
+  },
+  "chartRect": null,
+  "focusValue": "pair-custo-detalhe",
+  "focusOptions": [
+    {
+      "value": "pair-custo-gastos-diarios",
+      "label": "Custo by GASTOS DIARIOS"
+    },
+    {
+      "value": "pair-custo-detalhe",
+      "label": "Custo by Detalhe"
+    }
+  ],
+  "badges": [
+    "Trusted",
+    "Confidence: 96%",
+    "Transformation: None",
+    "Chart provenance: Generated",
+    "5 matches",
+    "Modelo",
+    "Mode: chart",
+    "Scoped result active",
+    "Confidence: 96%",
+    "Orientation: long_form",
+    "Source: Jan 2025",
+    "Scoped charts",
+    "Provenance: generated",
+    "Default: column",
+    "Provenance: Generated",
+    "Selected: Column",
+    "Focus: Custo by Detalhe",
+    "Table: tbl_01_05",
+    "Rows: 3",
+    "Scoped rows"
+  ]
+}

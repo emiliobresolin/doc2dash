@@ -110,12 +110,14 @@ GPT-5 Codex
 ### Debug Log References
 
 - `npm.cmd test -- --run src/features/dashboard/DashboardPage.test.tsx src/features/presentation/PresenterMode.test.tsx`
+- `npm.cmd run build`
 
 ### Completion Notes List
 
 - Added a sticky reading-navigation region that keeps presenter controls reachable during long-form reading and presenting.
 - Added persistent preview page controls to the sticky strip so users can keep paging without hunting for the bottom-of-card controls.
 - Preserved keyboard navigation and presenter-mode focus behavior while keeping the treatment visually subordinate to the dashboard content.
+- Followed up on the whole-page layout QA by restoring presenter and paging controls to the masthead/top-control area, keeping them reachable without consuming a primary workspace slot.
 
 ### File List
 
@@ -129,3 +131,4 @@ GPT-5 Codex
 
 - 2026-04-12: Story created from demo-observed navigation reachability issues and the corrective presentation-hardening slice.
 - 2026-04-12: Added sticky reading navigation and persistent preview paging without regressing presenter mode behavior.
+- 2026-04-12: Refined the navigation treatment so it remains top-row anchored and structurally independent from the workspace grid.

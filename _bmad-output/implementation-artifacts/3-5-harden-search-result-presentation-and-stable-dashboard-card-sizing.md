@@ -130,6 +130,8 @@ GPT-5 Codex
 ### Debug Log References
 
 - `npm.cmd test -- --run src/features/search/SearchPanel.test.tsx src/features/dashboard/DashboardPage.test.tsx src/features/presentation/PresenterMode.test.tsx src/components/charts/ChartPanel.test.tsx`
+- `npm.cmd test -- --run src/features/dashboard/DashboardPage.test.tsx src/features/presentation/PresenterMode.test.tsx`
+- `npm.cmd run build`
 
 ### Completion Notes List
 
@@ -137,6 +139,7 @@ GPT-5 Codex
 - Added a separate search-result inspector modal for full row/detail inspection instead of stretching the dashboard grid.
 - Introduced scoped search presentation so selecting a result temporarily owns the active chart and preview context until the user exits back to the workbook view.
 - Hardened chart mounting with explicit resize handling to fix the initial line-chart render defect.
+- Followed up on the integrated layout QA findings by keeping the scoped-search strip full-width, moving navigation controls out of the workspace grid, and tightening preview containment so dense data no longer deforms sibling cards.
 
 ### File List
 
@@ -156,3 +159,4 @@ GPT-5 Codex
 
 - 2026-04-12: Story created from fixture-library QA findings and screenshot-confirmed layout failures on long-form report content.
 - 2026-04-12: Implemented bounded search result cards, scoped search presentation, a separate detail inspector, and chart initial-render hardening.
+- 2026-04-12: Applied page-level layout stabilization so scoped presentation, preview containment, and card sizing behave as a coherent dashboard system.

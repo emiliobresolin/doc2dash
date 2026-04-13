@@ -11,7 +11,8 @@ import {
   getUploadRuntime,
   searchUploadPreview,
 } from "../../lib/api";
-import { formatChartSourceLabel } from "../../lib/charts";
+import { formatChartSourceLabel, getSafeChartType } from "../../lib/charts";
+import { buildScopedChartModel } from "../../lib/scopedCharts";
 import type {
   ChartType,
   PreviewPayload,
@@ -159,6 +160,9 @@ export function DashboardPage() {
   const [searchInspectorResult, setSearchInspectorResult] = useState<SearchResult | null>(null);
   const [searchScope, setSearchScope] = useState<SearchScopeState | null>(null);
   const [searching, setSearching] = useState(false);
+  const [selectedScopedChartOptionKey, setSelectedScopedChartOptionKey] = useState<string | null>(
+    null,
+  );
   const [requestedSectionFocus, setRequestedSectionFocus] = useState<PresenterSection | null>(
     null,
   );
@@ -430,9 +434,45 @@ export function DashboardPage() {
     runtime?.recoveryHint ??
     "Keep this route open. doc2dash will continue checking automatically.";
   const navigationGroups = useMemo(() => buildWorkbookNavigationGroups(manifest), [manifest]);
+  const scopedChartModel = useMemo(
+    () => (searchScope ? buildScopedChartModel(searchScope.result) : null),
+    [searchScope],
+  );
+  const activeScopedChartOption = useMemo(() => {
+    if (!scopedChartModel) {
+      return null;
+    }
+    return (
+      scopedChartModel.options.find((option) => option.key === selectedScopedChartOptionKey) ??
+      scopedChartModel.options[0] ??
+      null
+    );
+  }, [scopedChartModel, selectedScopedChartOptionKey]);
+
+  useEffect(() => {
+    if (!scopedChartModel) {
+      setSelectedScopedChartOptionKey(null);
+      return;
+    }
+
+    setSelectedScopedChartOptionKey((current) =>
+      scopedChartModel.options.some((option) => option.key === current)
+        ? current
+        : scopedChartModel.defaultOptionKey,
+    );
+  }, [scopedChartModel]);
+
+  useEffect(() => {
+    if (!activeScopedChartOption) {
+      return;
+    }
+
+    setSelectedChartType((current) => getSafeChartType(activeScopedChartOption.table, current));
+  }, [activeScopedChartOption]);
 
   function setNextTable(table: TableSummary) {
     setSearchScope(null);
+    setSelectedScopedChartOptionKey(null);
     setPreviewFilterQuery("");
     setPreviewPage(1);
     setSelectedTableId(table.tableId);
@@ -525,6 +565,7 @@ export function DashboardPage() {
       null;
     setSearchScope(null);
     setSearchContextQuery("");
+    setSelectedScopedChartOptionKey(null);
     setPreviewFilterQuery("");
     setPreviewPage(1);
     setSelectedTableId(fallbackTableId);
@@ -643,6 +684,7 @@ export function DashboardPage() {
     );
   }
 
+  const activeChartTable = activeScopedChartOption?.table ?? selectedTable;
   const sectionPosition = `${presenterIndex + 1} of ${presenterSections.length}`;
   const sourceLabel = `${selectedSheetName} / ${selectedTable.tableId}`;
 
@@ -749,7 +791,7 @@ export function DashboardPage() {
                   Transformation: {formatStatusLabel(selectedTable.normalization.status)}
                 </span>
                 <span className="badge">
-                  Chart provenance: {formatChartSourceLabel(selectedTable.chartSourceType)}
+                  Chart provenance: {formatChartSourceLabel(activeChartTable.chartSourceType)}
                 </span>
               </div>
             </div>
@@ -764,50 +806,53 @@ export function DashboardPage() {
                 response={searchResponse}
                 searching={searching}
               />
+              <div className="masthead-utility-row" role="region" aria-label="Reading navigation">
+                <PresenterToolbar
+                  enabled={presenting}
+                  canPresent={manifest.presentation.presenterModeAvailable}
+                  sectionLabel={currentSection}
+                  sectionPosition={sectionPosition}
+                  onToggle={togglePresenterMode}
+                  onPrevious={() => movePresenter(-1)}
+                  onNext={() => movePresenter(1)}
+                />
+                {!searchScope && activePreview && activePreview.totalPages > 1 ? (
+                  <div className="sticky-preview-nav" aria-label="Preview page controls">
+                    <p className="card-copy">
+                      Preview page {activePreview.page} of {activePreview.totalPages}
+                    </p>
+                    <div className="sticky-preview-nav__actions">
+                      <button
+                        onClick={() => setPreviewPage((current) => Math.max(current - 1, 1))}
+                        type="button"
+                        disabled={!activePreview.hasPreviousPage}
+                      >
+                        Previous page
+                      </button>
+                      <button
+                        onClick={() =>
+                          setPreviewPage((current) =>
+                            Math.min(current + 1, activePreview.totalPages),
+                          )
+                        }
+                        type="button"
+                        disabled={!activePreview.hasNextPage}
+                      >
+                        Next page
+                      </button>
+                    </div>
+                  </div>
+                ) : null}
+              </div>
             </div>
           </>
         }
       >
-        <section className="dashboard-sticky-nav" aria-label="Reading navigation">
-          <PresenterToolbar
-            enabled={presenting}
-            canPresent={manifest.presentation.presenterModeAvailable}
-            sectionLabel={currentSection}
-            sectionPosition={sectionPosition}
-            onToggle={togglePresenterMode}
-            onPrevious={() => movePresenter(-1)}
-            onNext={() => movePresenter(1)}
-          />
-          {!searchScope && activePreview && activePreview.totalPages > 1 ? (
-            <div className="sticky-preview-nav" aria-label="Preview page controls">
-              <p className="card-copy">
-                Preview page {activePreview.page} of {activePreview.totalPages}
-              </p>
-              <div className="sticky-preview-nav__actions">
-                <button
-                  onClick={() => setPreviewPage((current) => Math.max(current - 1, 1))}
-                  type="button"
-                  disabled={!activePreview.hasPreviousPage}
-                >
-                  Previous page
-                </button>
-                <button
-                  onClick={() =>
-                    setPreviewPage((current) =>
-                      Math.min(current + 1, activePreview.totalPages),
-                    )
-                  }
-                  type="button"
-                  disabled={!activePreview.hasNextPage}
-                >
-                  Next page
-                </button>
-              </div>
-            </div>
-          ) : null}
-        </section>
         {searchScope ? (
-          <section className="workspace-card workspace-card--scope" aria-label="Scoped search presentation">
+          <section
+            className="workspace-card workspace-card--scope"
+            aria-label="Scoped search presentation"
+          >
             <div className="card-header">
               <div>
                 <p className="eyebrow">Scoped from search</p>
@@ -903,9 +948,9 @@ export function DashboardPage() {
               <span className="badge">Source: {selectedSheetName}</span>
               {searchScope ? <span className="badge">Scoped charts</span> : null}
               <span className="badge">
-                Provenance: {selectedTable.chartSourceType}
+                Provenance: {activeChartTable.chartSourceType}
               </span>
-              <span className="badge">Default: {selectedTable.defaultChartType}</span>
+              <span className="badge">Default: {activeChartTable.defaultChartType}</span>
             </div>
           </div>
           {selectedTable.reviewRequired ? (
@@ -917,15 +962,18 @@ export function DashboardPage() {
             />
           ) : (
             <ChartPanel
+              chartOptions={scopedChartModel?.options}
               onSelect={setSelectedChartType}
+              onSelectChartOption={setSelectedScopedChartOptionKey}
               selectedChartType={selectedChartType}
-              table={selectedTable}
+              selectedChartOptionKey={selectedScopedChartOptionKey}
+              table={activeChartTable}
             />
           )}
         </section>
 
         <section
-          className={`workspace-card${currentSection === "preview" ? " workspace-card--focus" : ""}`}
+          className={`workspace-card workspace-card--preview workspace-card--preview-wide${currentSection === "preview" ? " workspace-card--focus" : ""}`}
           aria-labelledby="preview-heading"
           hidden={presenting && currentSection !== "preview"}
           ref={previewSectionRef}
@@ -983,7 +1031,12 @@ export function DashboardPage() {
                       <tr>
                         {activePreview.columns.map((column) => (
                           <th key={column} scope="col">
-                            {column}
+                            <span
+                              className="preview-table__cell-content preview-table__cell-content--head"
+                              title={column}
+                            >
+                              {column}
+                            </span>
                           </th>
                         ))}
                       </tr>
@@ -992,7 +1045,14 @@ export function DashboardPage() {
                       {activePreview.rows.map((row, rowIndex) => (
                         <tr key={`${activePreview.tableId}-${activePreview.page}-${rowIndex}`}>
                           {activePreview.columns.map((column) => (
-                            <td key={`${rowIndex}-${column}`}>{String(row[column] ?? "")}</td>
+                            <td key={`${rowIndex}-${column}`}>
+                              <span
+                                className="preview-table__cell-content"
+                                title={String(row[column] ?? "")}
+                              >
+                                {String(row[column] ?? "")}
+                              </span>
+                            </td>
                           ))}
                         </tr>
                       ))}

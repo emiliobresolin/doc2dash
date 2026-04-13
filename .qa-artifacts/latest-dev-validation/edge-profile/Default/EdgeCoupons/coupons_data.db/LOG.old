@@ -1,0 +1,6 @@
+2026/04/13-11:52:47.795 739c Reusing MANIFEST C:\Users\emili\Desktop\Projets\doc2dash\.qa-artifacts\latest-dev-validation\edge-profile\Default\EdgeCoupons/coupons_data.db/MANIFEST-000001
+2026/04/13-11:52:47.796 739c Recovering log #13
+2026/04/13-11:52:47.796 739c Reusing old log C:\Users\emili\Desktop\Projets\doc2dash\.qa-artifacts\latest-dev-validation\edge-profile\Default\EdgeCoupons/coupons_data.db/000013.log 
+2026/04/13-11:52:47.823 5260 Level-0 table #17: started
+2026/04/13-11:52:47.826 5260 Level-0 table #17: 682276 bytes OK
+2026/04/13-11:52:47.829 5260 Delete type=0 #13

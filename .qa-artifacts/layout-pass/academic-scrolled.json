@@ -1,0 +1,69 @@
+{
+  "viewport": {
+    "width": 1600,
+    "height": 1200
+  },
+  "documentHeight": 1300,
+  "scrollY": 100,
+  "sidebar": {
+    "x": 18,
+    "y": 18,
+    "width": 300,
+    "height": 1164,
+    "scrollHeight": 2176,
+    "clientHeight": 1162,
+    "overflowY": "auto"
+  },
+  "masthead": {
+    "x": 336,
+    "y": 18,
+    "width": 1246,
+    "height": 248
+  },
+  "cards": [
+    {
+      "index": 0,
+      "heading": "questions / tbl_07_02",
+      "hidden": false,
+      "x": 336,
+      "y": 184,
+      "width": 1246,
+      "height": 222,
+      "scrollHeight": 220,
+      "clientHeight": 220
+    },
+    {
+      "index": 1,
+      "heading": "Readable first view",
+      "hidden": false,
+      "x": 336,
+      "y": 424,
+      "width": 403.328125,
+      "height": 468,
+      "scrollHeight": 466,
+      "clientHeight": 466
+    },
+    {
+      "index": 2,
+      "heading": "Presentation slot",
+      "hidden": false,
+      "x": 757.328125,
+      "y": 424,
+      "width": 403.328125,
+      "height": 733,
+      "scrollHeight": 731,
+      "clientHeight": 731
+    },
+    {
+      "index": 3,
+      "heading": "Source-aware rows",
+      "hidden": false,
+      "x": 1178.65625,
+      "y": 424,
+      "width": 403.34375,
+      "height": 758,
+      "scrollHeight": 756,
+      "clientHeight": 756
+    }
+  ]
+}
