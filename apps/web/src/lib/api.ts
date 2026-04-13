@@ -1,4 +1,5 @@
 import type { PreviewPayload, UploadManifest, UploadRuntime } from "../types/manifest";
+import type { NarrativeSummaryPayload, NarrativeSummaryRequest } from "../types/narrative";
 import type { PreviewSearchResponse } from "../types/search";
 
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? "").replace(/\/$/, "");
@@ -93,4 +94,21 @@ export function searchUploadPreview(
     `/api/uploads/${uploadId}/search?${searchParams.toString()}`,
     { signal: options?.signal },
   );
+}
+
+export function getNarrativeSummary(
+  uploadId: string,
+  payload: NarrativeSummaryRequest,
+  options?: {
+    signal?: AbortSignal;
+  },
+) {
+  return request<NarrativeSummaryPayload>(`/api/uploads/${uploadId}/narratives/summary`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+    signal: options?.signal,
+  });
 }

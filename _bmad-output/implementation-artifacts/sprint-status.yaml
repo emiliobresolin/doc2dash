@@ -4,7 +4,7 @@
 # tracking_system: file-system
 
 generated: 2026-04-04
-last_updated: 2026-04-12
+last_updated: 2026-04-13
 project: doc2dash
 project_key: DOC2DASH
 tracking_system: file-system
@@ -39,4 +39,5 @@ development_status:
   3-6-keep-dashboard-navigation-reachable-during-reading: review
   3-7-improve-default-view-quality-and-condense-report-style-workbooks: review
   3-8-add-in-preview-filtering-for-source-aware-table-inspection: review
+  3-9-add-grounded-ai-narrative-summary-panel-to-the-summary-area: review
   epic-3-retrospective: optional

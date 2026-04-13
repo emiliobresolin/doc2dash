@@ -4,6 +4,7 @@ import { MemoryRouter } from "react-router-dom";
 
 import { AppRoutes } from "../../app/routes";
 import type { PreviewPayload, UploadManifest, UploadRuntime } from "../../types/manifest";
+import type { NarrativeSummaryPayload } from "../../types/narrative";
 import type { PreviewSearchResponse } from "../../types/search";
 
 const { newPlotMock, purgeMock, resizeMock } = vi.hoisted(() => ({
@@ -251,6 +252,62 @@ const fragmentedPreviews: Record<string, PreviewPayload> = {
   },
 };
 
+const tableNarrative: NarrativeSummaryPayload = {
+  status: "ready",
+  scope: {
+    mode: "table",
+    uploadId: "upl_demo",
+    tableId: "tbl_02_01",
+    query: null,
+  },
+  narrative: {
+    description: "This selected table appears to compare delivery value across teams in a compact summary format.",
+    insights: [
+      "Platform has the highest visible value in the current selected table.",
+      "The active table is chart-friendly and already suited to a presentation-first reading flow.",
+    ],
+    caveat: null,
+  },
+  basis: {
+    sheetName: "Summary",
+    rowCount: 3,
+    columnCount: 2,
+    confidence: 0.92,
+    reviewRequired: false,
+    defaultChartType: "column",
+    primaryMode: "chart",
+  },
+  fallbackMessage: null,
+};
+
+const scopedNarrative: NarrativeSummaryPayload = {
+  status: "ready",
+  scope: {
+    mode: "scopedResult",
+    uploadId: "upl_demo",
+    tableId: "tbl_01_01",
+    query: "alpha",
+  },
+  narrative: {
+    description: "In these scoped rows, Alpha appears as the only matched product in the active result.",
+    insights: [
+      "The scoped result is limited to one matching row from the Paged table.",
+      "This scoped summary should not be read as a workbook-wide conclusion.",
+    ],
+    caveat: "This narrative is based only on the selected scoped search result.",
+  },
+  basis: {
+    sheetName: "Paged",
+    rowCount: 1,
+    columnCount: 2,
+    confidence: 0.58,
+    reviewRequired: true,
+    defaultChartType: "table",
+    primaryMode: "table",
+  },
+  fallbackMessage: null,
+};
+
 const noTableManifest: UploadManifest = {
   ...manifest,
   workbook: {
@@ -489,7 +546,8 @@ function renderDashboard(options?: {
   previewData?: typeof previews;
   searchData?: PreviewSearchResponse;
   runtimeData?: UploadRuntime;
-  fetchImpl?: (url: string) => Promise<Response>;
+  narrativeData?: NarrativeSummaryPayload | ((url: string, init?: RequestInit) => NarrativeSummaryPayload);
+  fetchImpl?: (url: string, init?: RequestInit) => Promise<Response>;
   initialEntries?: Array<string | { pathname: string; state?: unknown }>;
 }) {
   const manifestData = options?.manifestData ?? manifest;
@@ -499,10 +557,10 @@ function renderDashboard(options?: {
 
   vi.stubGlobal(
     "fetch",
-    vi.fn((input: RequestInfo | URL) => {
+    vi.fn((input: RequestInfo | URL, init?: RequestInit) => {
       const url = String(input);
       if (options?.fetchImpl) {
-        return options.fetchImpl(url);
+        return options.fetchImpl(url, init);
       }
 
       if (url.includes("/manifest")) {
@@ -511,6 +569,14 @@ function renderDashboard(options?: {
 
       if (url.includes("/runtime")) {
         return Promise.resolve(apiResponse(runtimeData));
+      }
+
+      if (url.includes("/narratives/summary")) {
+        const nextNarrative =
+          typeof options?.narrativeData === "function"
+            ? options.narrativeData(url, init)
+            : options?.narrativeData ?? tableNarrative;
+        return Promise.resolve(apiResponse(nextNarrative));
       }
 
       if (url.includes("/preview")) {
@@ -550,13 +616,79 @@ test("lands on the backend-selected default dashboard view", async () => {
 
   await screen.findByText("report.xlsx / Summary / tbl_02_01");
   await screen.findByRole("cell", { name: "Platform" });
-  await screen.findByText("Value by Team");
+  await screen.findByText("Value by Team", { selector: "figcaption" });
 
   expect(screen.getByText("report.xlsx / Summary / tbl_02_01")).toBeInTheDocument();
   expect(screen.getByRole("cell", { name: "Platform" })).toBeInTheDocument();
   expect(screen.getByRole("cell", { name: "Architecture" })).toBeInTheDocument();
   expect(screen.getByText("Mode: chart")).toBeInTheDocument();
   expect(screen.getByText("Provenance: Generated")).toBeInTheDocument();
+  expect(
+    screen.getByText(
+      "This selected table appears to compare delivery value across teams in a compact summary format.",
+    ),
+  ).toBeInTheDocument();
+});
+
+test("shows a loading state in the existing summary area while the AI narrative is still generating", async () => {
+  const deferredNarrative = deferredResponse(tableNarrative);
+
+  renderDashboard({
+    fetchImpl: (url) => {
+      if (url.includes("/manifest")) {
+        return Promise.resolve(apiResponse(manifest));
+      }
+      if (url.includes("/runtime")) {
+        return Promise.resolve(apiResponse(runtimeForStatus("ready")));
+      }
+      if (url.includes("/narratives/summary")) {
+        return deferredNarrative.promise;
+      }
+      if (url.includes("/preview")) {
+        const tableId = url.split("/tables/")[1]?.split("/preview")[0] ?? "tbl_02_01";
+        return Promise.resolve(apiResponse(previews[tableId as keyof typeof previews]));
+      }
+      if (url.includes("/search")) {
+        return Promise.resolve(apiResponse(searchResponse));
+      }
+      return Promise.reject(new Error(`Unhandled request: ${url}`));
+    },
+  });
+
+  await screen.findByRole("region", { name: "AI narrative summary" });
+  const narrativeRegion = screen.getByRole("region", { name: "AI narrative summary" });
+  expect(within(narrativeRegion).getByText("Grounded table commentary")).toBeInTheDocument();
+  expect(within(narrativeRegion).getByText("Scope: Selected table")).toBeInTheDocument();
+  expect(within(narrativeRegion).getByText("Rows: 3")).toBeInTheDocument();
+  expect(document.querySelector(".summary-narrative__loading")).not.toBeNull();
+
+  deferredNarrative.resolve();
+
+  expect(
+    await screen.findByText(
+      "This selected table appears to compare delivery value across teams in a compact summary format.",
+    ),
+  ).toBeInTheDocument();
+});
+
+test("falls back cleanly when the AI narrative is unavailable", async () => {
+  renderDashboard({
+    narrativeData: {
+      ...tableNarrative,
+      status: "unavailable",
+      narrative: null,
+      fallbackMessage:
+        "AI narrative unavailable in this environment. Use summary, charts, and source-aware rows to review this scope.",
+    },
+  });
+
+  const narrativeRegion = await screen.findByRole("region", { name: "AI narrative summary" });
+  expect(
+    await within(narrativeRegion).findByText(
+      "AI narrative unavailable in this environment. Use summary, charts, and source-aware rows to review this scope.",
+    ),
+  ).toBeInTheDocument();
+  expect(within(narrativeRegion).getByText("Scope: Selected table")).toBeInTheDocument();
 });
 
 test("keeps reading navigation in the top masthead and bounds dense preview content inside the preview card", async () => {
@@ -844,7 +976,7 @@ test("shows only valid chart options and switches the chart without changing the
   renderDashboard();
   const user = userEvent.setup();
 
-  await screen.findByText("Value by Team");
+  await screen.findByText("Value by Team", { selector: "figcaption" });
 
   expect(screen.getByRole("button", { name: "Column" })).toBeInTheDocument();
   expect(screen.getByRole("button", { name: "Bar" })).toBeInTheDocument();
@@ -1189,6 +1321,70 @@ test("exits scoped search presentation back to the workbook context predictably"
   expect(screen.getByText("report.xlsx / Summary / tbl_02_01")).toBeInTheDocument();
   expect(screen.getByRole("cell", { name: "Platform" })).toBeInTheDocument();
   expect(screen.getByRole("cell", { name: "Architecture" })).toBeInTheDocument();
+});
+
+test("switches the AI narrative to the selected scoped result and restores the table narrative on exit", async () => {
+  renderDashboard({
+    narrativeData: (_url, init) => {
+      const payload = JSON.parse(String(init?.body ?? "{}")) as {
+        mode: "table" | "scopedResult";
+      };
+      return payload.mode === "scopedResult" ? scopedNarrative : tableNarrative;
+    },
+  });
+  const user = userEvent.setup();
+
+  await screen.findByText(
+    "This selected table appears to compare delivery value across teams in a compact summary format.",
+  );
+  await user.type(screen.getByRole("searchbox", { name: "Search preview rows" }), "alpha");
+  await user.click(
+    await screen.findByRole("button", { name: "Present Paged / tbl_01_01" }),
+  );
+
+  expect(
+    await screen.findByText(
+      "In these scoped rows, Alpha appears as the only matched product in the active result.",
+    ),
+  ).toBeInTheDocument();
+  const scopedNarrativeRegion = screen.getByRole("region", { name: "AI narrative summary" });
+  expect(within(scopedNarrativeRegion).getByText("Scope: Scoped result")).toBeInTheDocument();
+  expect(
+    within(scopedNarrativeRegion).getByText(
+      "Caveat: This narrative is based only on the selected scoped search result.",
+    ),
+  ).toBeInTheDocument();
+
+  await user.click(screen.getByRole("button", { name: "Exit scoped view" }));
+
+  expect(
+    await screen.findByText(
+      "This selected table appears to compare delivery value across teams in a compact summary format.",
+    ),
+  ).toBeInTheDocument();
+  expect(
+    within(screen.getByRole("region", { name: "AI narrative summary" })).getByText(
+      "Scope: Selected table",
+    ),
+  ).toBeInTheDocument();
+});
+
+test("reuses the same active narrative state in presenter mode", async () => {
+  renderDashboard();
+  const user = userEvent.setup();
+
+  await screen.findByText(
+    "This selected table appears to compare delivery value across teams in a compact summary format.",
+  );
+  await user.click(screen.getByRole("button", { name: "Enter presenter mode" }));
+
+  expect(screen.getByText("Focus: summary")).toBeInTheDocument();
+  expect(
+    screen.getByText(
+      "This selected table appears to compare delivery value across teams in a compact summary format.",
+    ),
+  ).toBeInTheDocument();
+  expect(screen.getByRole("region", { name: "AI narrative summary" })).toBeInTheDocument();
 });
 
 test("opens long-form search detail in a separate inspector surface", async () => {

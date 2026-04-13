@@ -1,5 +1,6 @@
 from functools import lru_cache
 from pathlib import Path
+from typing import Literal
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -12,6 +13,11 @@ class Settings(BaseSettings):
     uploads_root: Path = PROJECT_ROOT / "data" / "uploads"
     max_upload_size_bytes: int = 30 * 1024 * 1024
     frontend_dist_root: Path | None = None
+    narrative_provider: Literal["disabled", "local_openai_compatible"] = "disabled"
+    narrative_base_url: str | None = None
+    narrative_model: str | None = None
+    narrative_api_key: str | None = None
+    narrative_timeout_seconds: float = 6.0
 
     model_config = SettingsConfigDict(
         env_prefix="DOC2DASH_",

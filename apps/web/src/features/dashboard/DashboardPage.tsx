@@ -6,6 +6,7 @@ import { AppFrame } from "../../components/layout/AppFrame";
 import { SearchResultInspector } from "../../components/preview/SearchResultInspector";
 import {
   ApiRequestError,
+  getNarrativeSummary,
   getTablePreview,
   getUploadManifest,
   getUploadRuntime,
@@ -21,6 +22,7 @@ import type {
   UploadManifest,
   UploadRuntime,
 } from "../../types/manifest";
+import type { NarrativeSummaryPayload, NarrativeSummaryRequest } from "../../types/narrative";
 import { PresenterToolbar } from "../presentation/PresenterToolbar";
 import { SearchPanel } from "../search/SearchPanel";
 import type { PreviewSearchResponse, SearchResult } from "../../types/search";
@@ -104,6 +106,49 @@ function formatStatusLabel(value: string | null) {
     .join(" ");
 }
 
+function buildClientNarrativeFallback({
+  uploadId,
+  table,
+  sheetName,
+  mode,
+  query,
+  previewRows,
+}: {
+  uploadId: string;
+  table: TableSummary;
+  sheetName: string;
+  mode: NarrativeSummaryRequest["mode"];
+  query?: string | null;
+  previewRows?: SearchResult["previewRows"];
+}): NarrativeSummaryPayload {
+  return {
+    status: "unavailable",
+    scope: {
+      mode,
+      uploadId,
+      tableId: table.tableId,
+      query: query ?? null,
+    },
+    narrative: null,
+    basis: {
+      sheetName,
+      rowCount: mode === "scopedResult" ? previewRows?.length ?? 0 : table.stats.rowCount,
+      columnCount:
+        mode === "scopedResult"
+          ? Array.from(
+              new Set((previewRows ?? []).flatMap((row) => Object.keys(row.row))),
+            ).length
+          : table.stats.columnCount,
+      confidence: table.confidence,
+      reviewRequired: table.reviewRequired,
+      defaultChartType: table.defaultChartType,
+      primaryMode: table.stats.primaryMode,
+    },
+    fallbackMessage:
+      "AI narrative unavailable in this environment. Use summary, charts, and source-aware rows to review this scope.",
+  };
+}
+
 function isInteractiveShortcutTarget(target: EventTarget | null) {
   if (!(target instanceof HTMLElement)) {
     return false;
@@ -138,6 +183,8 @@ export function DashboardPage() {
   const [manifest, setManifest] = useState<UploadManifest | null>(null);
   const [runtime, setRuntime] = useState<UploadRuntime | null>(null);
   const [preview, setPreview] = useState<PreviewPayload | null>(null);
+  const [narrativeSummary, setNarrativeSummary] = useState<NarrativeSummaryPayload | null>(null);
+  const [narrativeLoading, setNarrativeLoading] = useState(false);
   const [selectedTableId, setSelectedTableId] = useState<string | null>(null);
   const [previewPage, setPreviewPage] = useState(1);
   const [statusLabel, setStatusLabel] = useState(
@@ -189,6 +236,8 @@ export function DashboardPage() {
     setManifest(null);
     setRuntime(null);
     setPreview(null);
+    setNarrativeSummary(null);
+    setNarrativeLoading(false);
     setSearchInspectorResult(null);
     setSearchContextQuery("");
     setSearchScope(null);
@@ -469,6 +518,83 @@ export function DashboardPage() {
 
     setSelectedChartType((current) => getSafeChartType(activeScopedChartOption.table, current));
   }, [activeScopedChartOption]);
+
+  const activeNarrativeRequest = useMemo<NarrativeSummaryRequest | null>(() => {
+    if (!selectedTable) {
+      return null;
+    }
+
+    if (searchScope) {
+      return {
+        mode: "scopedResult",
+        tableId: searchScope.result.tableId,
+        query: searchContextQuery || searchScope.result.snippet,
+        matchedColumns: searchScope.result.matchedColumns,
+        previewRows: searchScope.result.previewRows,
+      };
+    }
+
+    return {
+      mode: "table",
+      tableId: selectedTable.tableId,
+    };
+  }, [searchContextQuery, searchScope, selectedTable]);
+
+  const activeNarrativeKey = useMemo(() => {
+    if (!activeNarrativeRequest) {
+      return null;
+    }
+
+    return JSON.stringify(activeNarrativeRequest);
+  }, [activeNarrativeRequest]);
+
+  useEffect(() => {
+    if (!manifest || !selectedTable || !activeNarrativeRequest || !selectedSheetName) {
+      setNarrativeSummary(null);
+      setNarrativeLoading(false);
+      return;
+    }
+
+    const controller = new AbortController();
+    const narrativeRequest = activeNarrativeRequest;
+    const fallback = buildClientNarrativeFallback({
+      uploadId,
+      table: selectedTable,
+      sheetName: selectedSheetName,
+      mode: narrativeRequest.mode,
+      query: narrativeRequest.query,
+      previewRows:
+        narrativeRequest.mode === "scopedResult"
+          ? narrativeRequest.previewRows
+          : undefined,
+    });
+
+    setNarrativeLoading(true);
+    setNarrativeSummary(null);
+
+    async function loadNarrative() {
+      try {
+        const nextNarrative = await getNarrativeSummary(uploadId, narrativeRequest, {
+          signal: controller.signal,
+        });
+        if (!controller.signal.aborted) {
+          setNarrativeSummary(nextNarrative);
+          setNarrativeLoading(false);
+        }
+      } catch {
+        if (!controller.signal.aborted) {
+          setNarrativeSummary(fallback);
+          setNarrativeLoading(false);
+        }
+      }
+    }
+
+    void loadNarrative();
+
+    return () => {
+      controller.abort();
+    };
+  }, [activeNarrativeKey, activeNarrativeRequest, manifest, selectedSheetName, selectedTable, uploadId]);
 
   function setNextTable(table: TableSummary) {
     setSearchScope(null);
@@ -928,8 +1054,63 @@ export function DashboardPage() {
               <span>Promotion state</span>
             </article>
           </div>
-          <p className="card-copy">{selectedTable.stats.reason}</p>
-          <p className="provenance-copy">{selectedTable.normalization.reason}</p>
+          <section className="summary-narrative" aria-label="AI narrative summary">
+            <div className="summary-narrative__header">
+              <div>
+                <p className="eyebrow">AI narrative</p>
+                <h4>Grounded table commentary</h4>
+              </div>
+              <div className="badge-row summary-narrative__meta">
+                <span className="badge">
+                  Scope: {searchScope ? "Scoped result" : "Selected table"}
+                </span>
+                <span className="badge">
+                  Rows: {narrativeSummary?.basis.rowCount ?? selectedTable.stats.rowCount}
+                </span>
+                <span className="badge">
+                  Columns: {narrativeSummary?.basis.columnCount ?? selectedTable.stats.columnCount}
+                </span>
+                {narrativeSummary?.basis.reviewRequired ? (
+                  <span className="badge badge--warning">Caveat expected</span>
+                ) : null}
+              </div>
+            </div>
+            {narrativeLoading ? (
+              <div className="summary-narrative__loading" aria-live="polite">
+                <span className="summary-narrative__skeleton summary-narrative__skeleton--title" />
+                <span className="summary-narrative__skeleton" />
+                <span className="summary-narrative__skeleton" />
+                <span className="summary-narrative__skeleton summary-narrative__skeleton--short" />
+              </div>
+            ) : narrativeSummary?.status === "ready" && narrativeSummary.narrative ? (
+              <div className="summary-narrative__content">
+                <p className="summary-narrative__description">
+                  {narrativeSummary.narrative.description}
+                </p>
+                <ul className="summary-narrative__insights">
+                  {narrativeSummary.narrative.insights.map((insight) => (
+                    <li key={insight}>{insight}</li>
+                  ))}
+                </ul>
+                {narrativeSummary.narrative.caveat ? (
+                  <p className="summary-narrative__caveat">
+                    Caveat: {narrativeSummary.narrative.caveat}
+                  </p>
+                ) : null}
+              </div>
+            ) : (
+              <div className="summary-narrative__fallback" aria-live="polite">
+                <p className="card-copy">
+                  {narrativeSummary?.fallbackMessage ??
+                    "AI narrative unavailable in this environment. Use summary, charts, and source-aware rows to review this scope."}
+                </p>
+              </div>
+            )}
+          </section>
+          <div className="summary-supporting-copy">
+            <p className="card-copy">{selectedTable.stats.reason}</p>
+            <p className="provenance-copy">{selectedTable.normalization.reason}</p>
+          </div>
         </section>
 
         <section

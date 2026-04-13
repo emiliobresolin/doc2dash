@@ -92,6 +92,37 @@ const lineChartTable: TableSummary = {
   },
 };
 
+const pieChartTable: TableSummary = {
+  ...lineChartTable,
+  tableId: "tbl_01_02",
+  availableChartTypes: ["pie", "table"],
+  defaultChartType: "pie",
+  chartRecommendations: [
+    {
+      chartType: "pie",
+      title: "Value split by Team",
+      description: "Pie chart using Value as the measure and Team as the presentation dimension.",
+      dimensionLabel: "Team",
+      measureLabel: "Value",
+      points: [
+        { label: "Platform", value: 10 },
+        { label: "Finance", value: 6 },
+        { label: "Sales", value: 4 },
+      ],
+      truncated: false,
+    },
+    {
+      chartType: "table",
+      title: "Readable table view",
+      description: "The readable table remains available whenever a chart would hide detail.",
+      dimensionLabel: null,
+      measureLabel: null,
+      points: [],
+      truncated: false,
+    },
+  ],
+};
+
 beforeEach(() => {
   vi.stubGlobal("requestAnimationFrame", (callback: FrameRequestCallback) => {
     callback(0);
@@ -115,6 +146,23 @@ test("resizes line charts after the initial plot mount to stabilize first render
 
   await waitFor(() => expect(newPlotMock).toHaveBeenCalled());
   await waitFor(() => expect(resizeMock).toHaveBeenCalled());
+
+  const latestLineCall = newPlotMock.mock.calls[newPlotMock.mock.calls.length - 1] as unknown[];
+  const traces = latestLineCall[1] as Array<Record<string, unknown>>;
+  const layout = latestLineCall[2] as Record<string, unknown> & {
+    hoverlabel: Record<string, unknown>;
+    transition: Record<string, unknown>;
+    legend: Record<string, unknown>;
+    xaxis: Record<string, unknown>;
+  };
+  const config = latestLineCall[3] as Record<string, unknown>;
+  expect(config.displayModeBar).toBe("hover");
+  expect(layout.hoverlabel.bgcolor).toBe("rgba(22, 34, 41, 0.94)");
+  expect(layout.transition.duration).toBe(260);
+  expect(layout.legend.orientation).toBe("h");
+  expect(layout.xaxis.gridcolor).toBe("rgba(42, 88, 119, 0.14)");
+  expect(traces[0].mode).toContain("text");
+  expect(traces[0].hovertemplate).toContain("<extra></extra>");
 });
 
 test("surfaces scoped chart focus options without changing the chart type switcher contract", async () => {
@@ -207,4 +255,28 @@ test("surfaces scoped chart focus options without changing the chart type switch
   );
 
   expect(onSelectChartOption).toHaveBeenCalledWith("value-by-region");
+});
+
+test("gives pie charts the polished legend and premium hover treatment", async () => {
+  render(
+    <ChartPanel
+      onSelect={() => undefined}
+      selectedChartType="pie"
+      table={pieChartTable}
+    />,
+  );
+
+  await waitFor(() => expect(newPlotMock).toHaveBeenCalled());
+
+  const latestPieCall = newPlotMock.mock.calls[newPlotMock.mock.calls.length - 1] as unknown[];
+  const traces = latestPieCall[1] as Array<Record<string, unknown>>;
+  const layout = latestPieCall[2] as Record<string, unknown> & {
+    legend: Record<string, unknown>;
+  };
+  expect(traces[0].type).toBe("pie");
+  expect(traces[0].hole).toBe(0.62);
+  expect(traces[0].textinfo).toBe("percent");
+  expect(traces[0].hovertemplate).toContain("%{percent}");
+  expect(layout.showlegend).toBe(true);
+  expect(layout.legend.bgcolor).toBe("rgba(255, 250, 242, 0.68)");
 });

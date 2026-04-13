@@ -12,3 +12,5 @@ apps/web/node_modules/
 apps/web/dist/
 apps/web/*.tsbuildinfo
 data/uploads/
+
+.qa-artifacts/chart-visual-qa/uploads/**

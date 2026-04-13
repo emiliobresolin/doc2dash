@@ -514,3 +514,31 @@ So that I can narrow the source rows in context without relying only on global w
 **Given** the user exits the scoped search-selected state  
 **When** the dashboard returns to the normal workbook context  
 **Then** any preview-local filtering or scoped preview state resets in a clear, predictable way
+
+### Story 3.9: Add Grounded AI Narrative Summary Panel To The Summary Area
+
+As a report reader or presenter,  
+I want the summary area to include a grounded AI narrative for the currently active data scope,  
+So that I can quickly understand what the selected table or scoped search result appears to represent without needing chatbot-style interaction.
+
+**Acceptance Criteria:**
+
+**Given** the dashboard summary area in normal analysis mode  
+**When** a table is selected and the dashboard is otherwise ready  
+**Then** the summary area requests and shows a passive AI narrative for that selected table without blocking the rest of the dashboard
+
+**Given** scoped search presentation is active  
+**When** a search result has been explicitly selected for presentation  
+**Then** the AI narrative is scoped only to that selected result and its selected scoped rows, not to the rest of the workbook or other search results
+
+**Given** the AI narrative is returned  
+**When** the summary panel renders it  
+**Then** the content is limited to one short description, two to four concise findings, and at most one short caveat
+
+**Given** the AI provider is disabled, unavailable, slow, times out, or returns invalid output  
+**When** the dashboard remains in use  
+**Then** the summary area falls back to a safe unavailable state and the deterministic dashboard experience stays fully usable
+
+**Given** the product must remain free of paid AI dependencies  
+**When** the feature is implemented  
+**Then** it uses only a no-cost local or self-hosted model path and degrades gracefully when that environment is not configured

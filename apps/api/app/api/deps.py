@@ -4,6 +4,7 @@ from pathlib import Path
 from fastapi import Depends
 
 from app.core.config import Settings, get_settings
+from app.services.narrative_summary import NarrativeSummaryService
 from app.services.preview_search import PreviewSearchService
 from app.services.upload_bundle_store import UploadBundleStore
 from app.services.workbook_ingestion import WorkbookIngestionService
@@ -32,3 +33,10 @@ def get_preview_search_service(
     settings: Settings = Depends(get_settings),
 ) -> PreviewSearchService:
     return _get_preview_search_service_for_root(str(settings.uploads_root))
+
+
+def get_narrative_summary_service(
+    settings: Settings = Depends(get_settings),
+    bundle_store: UploadBundleStore = Depends(get_upload_bundle_store),
+) -> NarrativeSummaryService:
+    return NarrativeSummaryService(bundle_store, settings)

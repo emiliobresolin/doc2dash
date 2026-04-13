@@ -203,6 +203,98 @@ def test_get_preview_returns_persisted_preview_rows(
     assert filtered_preview["rows"][-1]["team"] == "team-23"
 
 
+def test_post_narrative_summary_returns_non_blocking_unavailable_state_when_provider_is_not_configured(
+    client: TestClient,
+    uploads_root: Path,
+) -> None:
+    response = client.post(
+        "/api/uploads",
+        files={"file": ("report.csv", b"team,value,notes\nplatform,4,alpha\narchitecture,3,ops\n", "text/csv")},
+    )
+
+    upload_id = response.json()["data"]["uploadId"]
+    manifest = client.get(f"/api/uploads/{upload_id}/manifest").json()["data"]
+    table_id = manifest["tables"][0]["tableId"]
+
+    narrative_response = client.post(
+        f"/api/uploads/{upload_id}/narratives/summary",
+        json={
+            "mode": "table",
+            "tableId": table_id,
+        },
+    )
+
+    assert narrative_response.status_code == 200
+    payload = narrative_response.json()["data"]
+    assert payload["status"] == "unavailable"
+    assert payload["scope"]["mode"] == "table"
+    assert payload["scope"]["tableId"] == table_id
+    assert payload["basis"]["rowCount"] == 2
+    assert payload["basis"]["columnCount"] == 3
+    assert payload["narrative"] is None
+    assert "AI narrative unavailable in this environment" in payload["fallbackMessage"]
+    assert (uploads_root / upload_id / "narratives").is_dir()
+
+
+def test_post_narrative_summary_scoped_result_uses_only_selected_rows_for_basis(
+    client: TestClient,
+) -> None:
+    response = client.post(
+        "/api/uploads",
+        files={
+            "file": (
+                "report.csv",
+                b"team,value,notes\nplatform,4,alpha launch\narchitecture,3,ops work\nplatform,2,follow up\n",
+                "text/csv",
+            )
+        },
+    )
+
+    upload_id = response.json()["data"]["uploadId"]
+    manifest = client.get(f"/api/uploads/{upload_id}/manifest").json()["data"]
+    table_id = manifest["tables"][0]["tableId"]
+
+    narrative_response = client.post(
+        f"/api/uploads/{upload_id}/narratives/summary",
+        json={
+            "mode": "scopedResult",
+            "tableId": table_id,
+            "query": "platform",
+            "matchedColumns": ["team"],
+            "previewRows": [
+                {
+                    "rowIndex": 0,
+                    "matchedColumns": ["team"],
+                    "row": {
+                        "team": "platform",
+                        "value": 4,
+                        "notes": "alpha launch",
+                    },
+                },
+                {
+                    "rowIndex": 2,
+                    "matchedColumns": ["team"],
+                    "row": {
+                        "team": "platform",
+                        "value": 2,
+                        "notes": "follow up",
+                    },
+                },
+            ],
+        },
+    )
+
+    assert narrative_response.status_code == 200
+    payload = narrative_response.json()["data"]
+    assert payload["status"] == "unavailable"
+    assert payload["scope"]["mode"] == "scopedResult"
+    assert payload["scope"]["query"] == "platform"
+    assert payload["basis"]["rowCount"] == 2
+    assert payload["basis"]["columnCount"] == 3
+    assert payload["basis"]["defaultChartType"] == manifest["tables"][0]["defaultChartType"]
+    assert payload["narrative"] is None
+
+
 def test_post_upload_rejects_oversized_files(client: TestClient) -> None:
     response = client.post(
         "/api/uploads",

@@ -1,6 +1,7 @@
 import json
 import math
 import re
+from hashlib import sha256
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -17,6 +18,7 @@ class UploadBundlePaths:
     source_dir: Path
     tables_dir: Path
     previews_dir: Path
+    narratives_dir: Path
     logs_dir: Path
     manifest_path: Path
     runtime_path: Path
@@ -31,9 +33,10 @@ class UploadBundleStore:
         source_dir = root / "source"
         tables_dir = root / "tables"
         previews_dir = root / "previews"
+        narratives_dir = root / "narratives"
         logs_dir = root / "logs"
 
-        for path in (source_dir, tables_dir, previews_dir, logs_dir):
+        for path in (source_dir, tables_dir, previews_dir, narratives_dir, logs_dir):
             path.mkdir(parents=True, exist_ok=True)
 
         return UploadBundlePaths(
@@ -42,6 +45,7 @@ class UploadBundleStore:
             source_dir=source_dir,
             tables_dir=tables_dir,
             previews_dir=previews_dir,
+            narratives_dir=narratives_dir,
             logs_dir=logs_dir,
             manifest_path=root / "manifest.json",
             runtime_path=root / "runtime.json",
@@ -62,6 +66,7 @@ class UploadBundleStore:
             source_dir=root / "source",
             tables_dir=root / "tables",
             previews_dir=root / "previews",
+            narratives_dir=root / "narratives",
             logs_dir=root / "logs",
             manifest_path=root / "manifest.json",
             runtime_path=root / "runtime.json",
@@ -157,6 +162,40 @@ class UploadBundleStore:
         )
         return preview_path
 
+    def read_table_artifact(self, upload_id: str, *, table_id: str) -> dict[str, object]:
+        bundle = self.load_bundle(upload_id)
+        table_path = bundle.tables_dir / f"{table_id}.json"
+        if not table_path.exists():
+            raise AppError(
+                status_code=404,
+                code="table_artifact_not_found",
+                message="We couldn't find source rows for that table yet.",
+            )
+        return json.loads(table_path.read_text(encoding="utf-8"))
+
+    def read_cached_narrative(
+        self,
+        upload_id: str,
+        *,
+        cache_key: str,
+    ) -> dict[str, object] | None:
+        bundle = self.load_bundle(upload_id)
+        cache_path = self._narrative_cache_path(bundle, cache_key)
+        if not cache_path.exists():
+            return None
+        return json.loads(cache_path.read_text(encoding="utf-8"))
+
+    def write_cached_narrative(
+        self,
+        bundle: UploadBundlePaths,
+        *,
+        cache_key: str,
+        payload: dict[str, object],
+    ) -> Path:
+        cache_path = self._narrative_cache_path(bundle, cache_key)
+        cache_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+        return cache_path
+
     def write_log(
         self,
         bundle: UploadBundlePaths,
@@ -169,7 +208,7 @@ class UploadBundleStore:
         return log_path
 
     def cleanup_generated_artifacts(self, bundle: UploadBundlePaths) -> None:
-        for directory in (bundle.tables_dir, bundle.previews_dir):
+        for directory in (bundle.tables_dir, bundle.previews_dir, bundle.narratives_dir):
             if not directory.exists():
                 continue
             for artifact in directory.glob("*.json"):
@@ -311,3 +350,8 @@ class UploadBundleStore:
                 token_like_values += 1
 
         return token_like_values >= max(2, len(values) - 1)
+
+    @staticmethod
+    def _narrative_cache_path(bundle: UploadBundlePaths, cache_key: str) -> Path:
+        digest = sha256(cache_key.encode("utf-8")).hexdigest()[:20]
+        return bundle.narratives_dir / f"summary-{digest}.json"

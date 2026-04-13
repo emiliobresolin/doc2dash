@@ -2,12 +2,15 @@ from fastapi import APIRouter, BackgroundTasks, Depends, File, Query, UploadFile
 from fastapi.responses import JSONResponse
 
 from app.api.deps import (
+    get_narrative_summary_service,
     get_upload_bundle_store,
     get_workbook_ingestion_service,
 )
 from app.core.errors import AppError
 from app.core.config import Settings, get_settings
 from app.schemas.api import ApiResponse
+from app.schemas.narratives import NarrativeSummaryRequest
+from app.services.narrative_summary import NarrativeSummaryService
 from app.services.upload_bundle_store import UploadBundlePaths, UploadBundleStore
 from app.services.workbook_ingestion import WorkbookIngestionService
 from app.utils.file_validation import validate_upload
@@ -87,6 +90,20 @@ def get_upload_runtime(
 ) -> JSONResponse:
     runtime = bundle_store.read_runtime(upload_id)
     response = ApiResponse(data=runtime.model_dump(by_alias=True, mode="json"))
+    return JSONResponse(
+        status_code=status.HTTP_200_OK,
+        content=response.model_dump(by_alias=True, mode="json"),
+    )
+
+
+@router.post("/{upload_id}/narratives/summary")
+async def generate_narrative_summary(
+    upload_id: str,
+    request: NarrativeSummaryRequest,
+    narrative_service: NarrativeSummaryService = Depends(get_narrative_summary_service),
+) -> JSONResponse:
+    payload = await narrative_service.summarize(upload_id=upload_id, request=request)
+    response = ApiResponse(data=payload.model_dump(by_alias=True, mode="json"))
     return JSONResponse(
         status_code=status.HTTP_200_OK,
         content=response.model_dump(by_alias=True, mode="json"),
